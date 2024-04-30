@@ -68,7 +68,24 @@ class GraphProcessor:
             edge_enabled: list of bools indicating of an edge is enabled or not
             source_vertex_id: vertex id of the source in the graph
         """
-        # put your implementation here
+        if len(vertex_ids) != len(set(vertex_ids)):
+            raise IDNotUniqueError("Vertex IDs must be unique")
+        
+        if len(edge_ids) != len(edge_vertex_id_pairs):
+            raise InputLengthDoesNotMatchError("Length of edge_ids does not match the length of edge_vertex_id_pairs")
+        
+        for pair in edge_vertex_id_pairs:
+            if pair[0] not in vertex_ids or pair[1] not in vertex_ids:
+                raise IDNotFoundError("Values in edge_vertex_id_pairs must be valid vertex IDs")
+        
+        if len(edge_enabled) != len(edge_ids):
+            raise InputLengthDoesNotMatchError("Length of edge_enabled does not match the length of edge_ids")
+
+        if source_vertex_id not in vertex_ids:
+            raise IDNotFoundError("Source vertex ID is not a valid vertex ID")
+        
+        
+
         pass
 
     def find_downstream_vertices(self, edge_id: int) -> List[int]:
