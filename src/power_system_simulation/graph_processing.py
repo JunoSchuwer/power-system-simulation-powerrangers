@@ -4,6 +4,7 @@ This is a skeleton for the graph processing assignment.
 We define a graph processor class with some function skeletons.
 """
 
+import numpy as np
 from typing import List, Tuple
 
 
@@ -76,7 +77,10 @@ class GraphProcessor:
         
         for pair in edge_vertex_id_pairs:
             if pair[0] not in vertex_ids or pair[1] not in vertex_ids:
-                raise IDNotFoundError("Values in edge_vertex_id_pairs must be valid vertex IDs")
+                if pair[0] not in vertex_ids:
+                    raise IDNotFoundError("Values in edge_vertex_id_pairs must be valid vertex IDs, value: "+str(pair[0])+" not found")
+                else:
+                    raise IDNotFoundError("Values in edge_vertex_id_pairs must be valid vertex IDs, value: "+str(pair[1])+" not found") 
         
         if len(edge_enabled) != len(edge_ids):
             raise InputLengthDoesNotMatchError("Length of edge_enabled does not match the length of edge_ids")
@@ -84,8 +88,6 @@ class GraphProcessor:
         if source_vertex_id not in vertex_ids:
             raise IDNotFoundError("Source vertex ID is not a valid vertex ID")
         
-        
-
         pass
 
     def find_downstream_vertices(self, edge_id: int) -> List[int]:
