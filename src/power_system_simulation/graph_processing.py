@@ -87,6 +87,17 @@ class GraphProcessor:
 
         if source_vertex_id not in vertex_ids:
             raise IDNotFoundError("Source vertex ID is not a valid vertex ID")
+
+        self.graph=nx.Graph()
+        for i, (v1, v2) in enumerate(edge_vertex_id_pairs):
+            if edge_enabled[i]:
+                self.graph.add_edge(v1, v2)
+
+        if not nx.is_connected(self.graph):
+            raise GraphNotFullyCorrectedError("The graph is not fully connected ")
+
+        if nx.cycle_basis(self.graph):
+            raise GraphCycleError("The graph does not contain cycles ")
         
         pass
 
