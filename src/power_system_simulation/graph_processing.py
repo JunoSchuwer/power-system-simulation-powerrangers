@@ -69,7 +69,16 @@ class GraphProcessor:
             edge_enabled: list of bools indicating of an edge is enabled or not
             source_vertex_id: vertex id of the source in the graph
         """
+        self.vertex_ids = vertex_ids
+        self.edge_ids = edge_ids
+        self.edge_vertex_id_pairs = edge_vertex_id_pairs
+        self.edge_enabled = edge_enabled
+        self.source_vertex_id = source_vertex_id
+
         if len(vertex_ids) != len(set(vertex_ids)):
+            raise IDNotUniqueError("Vertex IDs must be unique")
+        
+        if len(edge_ids) != len(set(edge_ids)):
             raise IDNotUniqueError("Vertex IDs must be unique")
         
         if len(edge_ids) != len(edge_vertex_id_pairs):
@@ -154,3 +163,12 @@ class GraphProcessor:
         """
         # put your implementation here
         pass
+
+
+vertex_ids = [0, 1, 2, 3]
+edge_ids = [0, 1, 2]
+edge_vertex_id_pairs = [(0, 1), (1, 2), (2, 3)] #will look like: 0-1-2-3
+edge_enabled = [True, True, True]
+source_vertex_id = 0
+
+graph = GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
