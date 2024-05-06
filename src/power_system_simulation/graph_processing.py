@@ -5,6 +5,7 @@ We define a graph processor class with some function skeletons.
 """
 
 import numpy as np
+import networkx as nx
 from typing import List, Tuple
 
 
@@ -94,7 +95,7 @@ class GraphProcessor:
                 self.graph.add_edge(v1, v2)
 
         if not nx.is_connected(self.graph):
-            raise GraphNotFullyCorrectedError("The graph is not fully connected ")
+            raise GraphNotFullyConnectedError("The graph is not fully connected ")
 
         if nx.cycle_basis(self.graph):
             raise GraphCycleError("The graph does not contain cycles ")
