@@ -42,10 +42,10 @@ class GraphProcessor:
 
     def __init__(
         self,
-        vertex_ids: List[int],
-        edge_ids: List[int],
-        edge_vertex_id_pairs: List[Tuple[int, int]],
-        edge_enabled: List[bool],
+        vertex_ids: np.ndarray,                 #Changed data types - all can be interpreted as 1D or 2D (for ID pairs) arrays
+        edge_ids: np.ndarray,
+        edge_vertex_id_pairs: np.ndarray,
+        edge_enabled: np.ndarray,
         source_vertex_id: int,
     ) -> None:
         """
@@ -90,9 +90,12 @@ class GraphProcessor:
             raise IDNotFoundError("Source vertex ID is not a valid vertex ID")
 
         self.graph=nx.Graph()
-        for i, (v1, v2) in enumerate(edge_vertex_id_pairs):
+
+        i = 0
+        for row in edge_vertex_id_pairs:        #Going row by row in matrix instead of list of tuples
             if edge_enabled[i]:
-                self.graph.add_edge(v1, v2)
+                self.graph.add_edge(row[0], row[1])
+            i = i + 1                   #Keeping count of the current row and updating
 
         if not nx.is_connected(self.graph):
             raise GraphNotFullyConnectedError("The graph is not fully connected ")
