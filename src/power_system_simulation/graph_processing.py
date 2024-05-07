@@ -70,8 +70,15 @@ class GraphProcessor:
             edge_enabled: list of bools indicating of an edge is enabled or not
             source_vertex_id: vertex id of the source in the graph
         """
-        if len(vertex_ids) != len(set(vertex_ids)):
+
+        if any(np.isin(vertex_ids, edge_ids)):      #Checks that all elements from the two arrays are different
             raise IDNotUniqueError("Vertex IDs must be unique")
+        
+        if len(vertex_ids) != len(set(vertex_ids)): #Checks vertex_ids are unique
+            raise IDNotUniqueError("Vertex IDs must be unique")
+        
+        if len(edge_ids) != len(set(edge_ids)):     #Checks edge_ids are unique
+            raise IDNotUniqueError("Edge IDs must be unique")
         
         if len(edge_ids) != len(edge_vertex_id_pairs):
             raise InputLengthDoesNotMatchError("Length of edge_ids does not match the length of edge_vertex_id_pairs")
