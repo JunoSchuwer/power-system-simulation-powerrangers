@@ -72,43 +72,49 @@ class GraphProcessor:
         """
 
         if any(np.isin(vertex_ids, edge_ids)):      #Checks that all elements from the two arrays are different
-            raise IDNotUniqueError("Vertex IDs must be unique")
+            raise IDNotUniqueError("Vertex IDs and Edge IDs must be different from each other!")
         
         if len(vertex_ids) != len(set(vertex_ids)): #Checks vertex_ids are unique
-            raise IDNotUniqueError("Vertex IDs must be unique")
+            raise IDNotUniqueError("Vertex IDs must be unique!")
         
         if len(edge_ids) != len(set(edge_ids)):     #Checks edge_ids are unique
-            raise IDNotUniqueError("Edge IDs must be unique")
+            raise IDNotUniqueError("Edge IDs must be unique!")
         
         if len(edge_ids) != len(edge_vertex_id_pairs):
-            raise InputLengthDoesNotMatchError("Length of edge_ids does not match the length of edge_vertex_id_pairs")
+            raise InputLengthDoesNotMatchError("Length of edge_ids does not match the length of edge_vertex_id_pairs!")
         
         for pair in edge_vertex_id_pairs:
             if pair[0] not in vertex_ids or pair[1] not in vertex_ids:
                 if pair[0] not in vertex_ids:
-                    raise IDNotFoundError("Values in edge_vertex_id_pairs must be valid vertex IDs, value: "+str(pair[0])+" not found")
+                    raise IDNotFoundError("Values in edge_vertex_id_pairs must be valid vertex IDs, value: "+str(pair[0])+" not found!")
                 else:
-                    raise IDNotFoundError("Values in edge_vertex_id_pairs must be valid vertex IDs, value: "+str(pair[1])+" not found") 
+                    raise IDNotFoundError("Values in edge_vertex_id_pairs must be valid vertex IDs, value: "+str(pair[1])+" not found!") 
         
         if len(edge_enabled) != len(edge_ids):
-            raise InputLengthDoesNotMatchError("Length of edge_enabled does not match the length of edge_ids")
+            raise InputLengthDoesNotMatchError("Length of edge_enabled does not match the length of edge_ids!")
 
         if source_vertex_id not in vertex_ids:
-            raise IDNotFoundError("Source vertex ID is not a valid vertex ID")
+            raise IDNotFoundError("Source vertex ID is not a valid vertex ID!")
 
-        self.graph=nx.Graph()
+        self.graph_cycles=nx.Graph()
+        self.graph_connection=nx.Graph()
 
         i = 0
         for row in edge_vertex_id_pairs:        #Going row by row in matrix instead of list of tuples
             if edge_enabled[i]:
-                self.graph.add_edge(row[0], row[1])
-            i = i + 1                   #Keeping count of the current row and updating
+                self.graph_cycles.add_edge(row[0], row[1])
+            self.graph_connection.add_edge(row[0], row[1])      #For cycles only enabled edges must be considered, for connection all must be
+            i = i + 1                           #Keeping count of the current row and updating
 
-        if not nx.is_connected(self.graph):
-            raise GraphNotFullyConnectedError("The graph is not fully connected ")
+        if not nx.is_connected(self.graph_connection):
+            raise GraphNotFullyConnectedError("The graph is not fully connected!")
 
-        if nx.cycle_basis(self.graph):
-            raise GraphCycleError("The graph does not contain cycles ")
+        try:
+            nx.find_cycle(self.graph_cycles)
+        except:
+            pass
+        else:
+            raise GraphCycleError("The graph contains cycles!")
         
         pass
 
