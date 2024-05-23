@@ -57,7 +57,7 @@ class TestGraphProcessor(unittest.TestCase):
 
     def test_edge_vertex_id_pairs_length(self):
         vertex_ids = np.array([1, 2, 3])
-        edge_ids = np.array([1, 2])
+        edge_ids = np.array([4, 5])
         edge_vertex_id_pairs = np.array([[1, 2]])
         edge_enabled = np.array([True, True])
         source_vertex_id = 1
@@ -67,7 +67,7 @@ class TestGraphProcessor(unittest.TestCase):
 
     def test_valid_vertex_ids_in_pairs(self):
         vertex_ids = np.array([1, 2, 3])
-        edge_ids = np.array([1, 2])
+        edge_ids = np.array([4, 5])
         edge_vertex_id_pairs = np.array([[1, 2], [2, 4]])  # 4 is not a valid vertex id
         edge_enabled = np.array([True, True])
         source_vertex_id = 1
@@ -77,7 +77,7 @@ class TestGraphProcessor(unittest.TestCase):
 
     def test_edge_enabled_length(self):
         vertex_ids = np.array([1, 2, 3])
-        edge_ids = np.array([1, 2])
+        edge_ids = np.array([4, 5])
         edge_vertex_id_pairs = np.array([[1, 2], [2, 3]])
         edge_enabled = np.array([True])
         source_vertex_id = 1
@@ -87,7 +87,7 @@ class TestGraphProcessor(unittest.TestCase):
 
     def test_valid_source_vertex_id(self):
         vertex_ids = np.array([1, 2, 3])
-        edge_ids = np.array([1, 2])
+        edge_ids = np.array([4, 5])
         edge_vertex_id_pairs = np.array([[1, 2], [2, 3]])
         edge_enabled = np.array([True, True])
         source_vertex_id = 4  # Not a valid vertex id
@@ -97,9 +97,9 @@ class TestGraphProcessor(unittest.TestCase):
 
     def test_fully_connected_graph(self):
         vertex_ids = np.array([1, 2, 3, 4])
-        edge_ids = np.array([1, 2, 3])
-        edge_vertex_id_pairs = np.array([[1, 2], [2, 3]])
-        edge_enabled = np.array([True, True])
+        edge_ids = np.array([5, 6, 7])
+        edge_vertex_id_pairs = np.array([[1, 2], [2, 3],[3,4]])
+        edge_enabled = np.array([True, True, True])
         source_vertex_id = 1
 
         with self.assertRaises(GraphNotFullyConnectedError):
@@ -107,7 +107,7 @@ class TestGraphProcessor(unittest.TestCase):
             
 def test_no_cycles(self):
     vertex_ids = np.array([1, 2, 3])
-    edge_ids = np.array([1, 2, 3])
+    edge_ids = np.array([4, 5, 6])
     edge_vertex_id_pairs = np.array([[1, 2], [2, 3], [3, 1]])
     edge_enabled = np.array([True, True, True])
     source_vertex_id = 1
