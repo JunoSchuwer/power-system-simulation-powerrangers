@@ -96,24 +96,24 @@ class TestGraphProcessor(unittest.TestCase):
             GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
 
     def test_fully_connected_graph(self):
-        vertex_ids = np.array([1, 2, 3, 4])
-        edge_ids = np.array([5, 6, 7])
-        edge_vertex_id_pairs = np.array([[1, 2], [2, 3],[3,4]])
-        edge_enabled = np.array([True, True, True])
+        vertex_ids = np.array([1, 2, 3])
+        edge_ids = np.array([4, 5])
+        edge_vertex_id_pairs = np.array([[1, 2]])
+        edge_enabled = np.array([True])
         source_vertex_id = 1
 
         with self.assertRaises(GraphNotFullyConnectedError):
             GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
             
-def test_no_cycles(self):
-    vertex_ids = np.array([1, 2, 3])
-    edge_ids = np.array([4, 5, 6])
-    edge_vertex_id_pairs = np.array([[1, 2], [2, 3], [3, 1]])
-    edge_enabled = np.array([True, True, True])
-    source_vertex_id = 1
+    def test_no_cycles(self):
+        vertex_ids = np.array([1, 2, 3])
+        edge_ids = np.array([4, 5, 6])
+        edge_vertex_id_pairs = np.array([[1, 2], [2, 3], [3, 1]])
+        edge_enabled = np.array([True, True, True])
+        source_vertex_id = 1
 
-    with self.assertRaises(GraphCycleError):
-        GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
+        with self.assertRaises(GraphCycleError):
+            GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
 
 
 if __name__ == "__main__":

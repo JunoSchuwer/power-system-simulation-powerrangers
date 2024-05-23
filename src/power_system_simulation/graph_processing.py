@@ -153,7 +153,7 @@ class GraphProcessor:
         try:
             nx.find_cycle(self.graph_cycles)
         except:
-            nx.exception.NetworkXNoCycle
+            pass
         else:
             raise GraphCycleError("The graph contains cycles!")
 
@@ -163,7 +163,6 @@ class GraphProcessor:
         self.children_dict = {}
         self.parent_dict = {}
         self.create_children_parent_dictonary(self.source_vertex_id)
-
 
     def find_downstream_vertices(self, edge_id: int) -> List[int]:
         """
