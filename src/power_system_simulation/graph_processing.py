@@ -9,7 +9,7 @@ We define a graph processor class with some function skeletons.
 import random
 import time
 from typing import List, Tuple
-
+from networkx.exception import NetworkXNoCycle
 import networkx as nx
 import numpy as np
 
@@ -152,8 +152,7 @@ class GraphProcessor:
         try:
             nx.find_cycle(self.graph_cycles)
         except:
-            nx.NetworkXNoCycle
-            pass
+            nx.exception.NetworkXNoCycle
         else:
             raise GraphCycleError("The graph contains cycles!")
 
@@ -164,7 +163,6 @@ class GraphProcessor:
         self.parent_dict = {}
         self.create_children_parent_dictonary(self.source_vertex_id)
 
-        pass
 
     def find_downstream_vertices(self, edge_id: int) -> List[int]:
         """
@@ -332,7 +330,7 @@ class GraphProcessor:
                             self.network_dict[tup[tup_idx]].append(-tup[tup_idx - 1])
                     self.network_dict_edge_id[tup[tup_idx]].append(self.edge_ids[idx_tup_enable])
 
-#pylint: disable w0105
+#pylint: disable 105
 """
 def find_two_random(max_number) -> Tuple[int]:
     num1=random.randint(0,max_number)

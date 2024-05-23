@@ -55,3 +55,12 @@ fail-under = 10
 # Minimum Python version to use for version dependent checks. Will default to the
 # version used to run pylint.
 py-version = "3.12"
+
+# change line length to 120
+max-line-length=120
+# change instance attributes to 15
+max-attributes=15
+# change many branches to 20
+max-branches=20
+# change max statements to 60
+max-statements=60
