@@ -94,15 +94,16 @@ class GraphProcessor:
         if np.any(vertex_ids <= 0):
             raise NegativeVertexIDError("Vertex ID must be a positive interger!")
 
-        if not issubclass(vertex_ids.dtype.type, np.interger):
+        if not issubclass(vertex_ids.dtype.type, np.integer):
             raise VertexIDcontainsnoninterger("Vertex ID must be real interger!")
-
+    
         if any(np.isin(vertex_ids, edge_ids)):  # Checks that all elements from the two arrays are different
             for i in vertex_ids:
                 if i in edge_ids:
                     raise IDNotUniqueError(
                         "Vertex ID matches with edge ID, value: " + str(i) + " both vertex and edge ID"
                     )
+
 
         if len(vertex_ids) != len(set(vertex_ids)):  # Checks vertex_ids are unique
             raise IDNotUniqueError("Vertex IDs must be unique!")
