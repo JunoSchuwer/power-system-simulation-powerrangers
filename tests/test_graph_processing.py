@@ -97,7 +97,7 @@ class TestGraphProcessor(unittest.TestCase):
 
     def test_fully_connected_graph(self):
         vertex_ids = np.array([1, 2, 3])
-        edge_ids = np.array([4, 5])
+        edge_ids = np.array([4])
         edge_vertex_id_pairs = np.array([[1, 2]])
         edge_enabled = np.array([True])
         source_vertex_id = 1
