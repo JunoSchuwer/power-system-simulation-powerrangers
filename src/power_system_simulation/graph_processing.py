@@ -9,9 +9,10 @@ We define a graph processor class with some function skeletons.
 import random
 import time
 from typing import List, Tuple
-from networkx.exception import NetworkXNoCycle
+
 import networkx as nx
 import numpy as np
+from networkx.exception import NetworkXNoCycle
 
 
 # pylint: disable=C0115
@@ -96,14 +97,13 @@ class GraphProcessor:
 
         if not issubclass(vertex_ids.dtype.type, np.integer):
             raise VertexIDcontainsnoninterger("Vertex ID must be real interger!")
-    
+
         if any(np.isin(vertex_ids, edge_ids)):  # Checks that all elements from the two arrays are different
             for i in vertex_ids:
                 if i in edge_ids:
                     raise IDNotUniqueError(
                         "Vertex ID matches with edge ID, value: " + str(i) + " both vertex and edge ID"
                     )
-
 
         if len(vertex_ids) != len(set(vertex_ids)):  # Checks vertex_ids are unique
             raise IDNotUniqueError("Vertex IDs must be unique!")
@@ -117,11 +117,13 @@ class GraphProcessor:
         for pair in edge_vertex_id_pairs:
             if pair[0] not in vertex_ids or pair[1] not in vertex_ids:
                 if pair[0] not in vertex_ids:
-                    incorrect_value=pair[0]
+                    incorrect_value = pair[0]
                 else:
-                    incorrect_value=pair[1]
+                    incorrect_value = pair[1]
                 raise IDNotFoundError(
-                    "Values in edge_vertex_id_pairs must be valid vertex IDs, value: " + str(incorrect_value) + " not found!"
+                    "Values in edge_vertex_id_pairs must be valid vertex IDs, value: "
+                    + str(incorrect_value)
+                    + " not found!"
                 )
 
         if len(edge_enabled) != len(edge_ids):
@@ -326,7 +328,8 @@ class GraphProcessor:
                             self.network_dict[tup[tup_idx]].append(-tup[tup_idx - 1])
                     self.network_dict_edge_id[tup[tup_idx]].append(self.edge_ids[idx_tup_enable])
 
-#pylint: disable 105
+
+# pylint: disable 105
 """
 def find_two_random(max_number) -> Tuple[int]:
     num1=random.randint(0,max_number)
