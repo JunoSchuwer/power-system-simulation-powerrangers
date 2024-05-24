@@ -1,4 +1,5 @@
 import unittest
+
 import numpy as np
 
 from power_system_simulation.graph_processing import (
