@@ -146,12 +146,14 @@ class GraphProcessor:
         if not nx.is_connected(self.graph_connection):
             raise GraphNotFullyConnectedError("The graph is not fully connected!")
 
+        # pylint: disable=W0702
         try:
             nx.find_cycle(self.graph_cycles)
         except:
             pass
         else:
             raise GraphCycleError("The graph contains cycles!")
+        # pylint: enable=W0702
 
         # create children and parent dictionary used in other functions:
         self.network_dict = {}
@@ -327,91 +329,3 @@ class GraphProcessor:
                         else:
                             self.network_dict[tup[tup_idx]].append(-tup[tup_idx - 1])
                     self.network_dict_edge_id[tup[tup_idx]].append(self.edge_ids[idx_tup_enable])
-
-
-# pylint: disable 105
-"""
-def find_two_random(max_number) -> Tuple[int]:
-    num1=random.randint(0,max_number)
-    num2=random.randint(0,max_number)
-    while num1==num2:
-        num2=random.randint(0,max_number)
-    if num2 < num1:
-        num1,num2=num2,num1
-    return num1,num2
-
-start_generate=time.time()
-#set number of vertices and cross connecting (random) edges which are disabled
-number_of_vertices=100000
-number_of_random_edges=100000#never much higher than number of vertices!!!
-
-#generate vertex ids, edge_ids, edge enabled and source vertex
-vertex_ids=np.array([i for i in range(number_of_vertices)])
-edge_ids=np.array([i+number_of_vertices for i in range(number_of_vertices-1+number_of_random_edges)])
-edge_enabled=np.array([True] * (number_of_vertices-1) + [False] * number_of_random_edges)
-source_vertex_id=0
-
-#generate edge vertex id pairs
-vertex_pos=0
-size=1
-prev_vertices=[0]
-edge_vertex_id_pairs_list=[]
-connected_dict={0:[]}
-while True:
-    vertex_pos+=size
-    if vertex_pos>number_of_vertices-1:
-        break
-    size*=2
-    if vertex_pos+size>number_of_vertices:
-        size=number_of_vertices-vertex_pos
-    new_vertices=vertex_ids[vertex_pos:vertex_pos+size]
-    for idx,i in enumerate(new_vertices):
-        connected_prev=prev_vertices[idx//2]
-        edge_vertex_id_pairs_list.append([connected_prev,i])
-        connected_dict[i]=[connected_prev]
-        connected_dict[connected_prev].append(i)
-    prev_vertices=new_vertices
-
-for i in range(number_of_random_edges):
-    vertex1,vertex2=find_two_random(number_of_vertices-1)
-    while vertex2 in connected_dict[vertex1]:
-        vertex1,vertex2=find_two_random(number_of_vertices-1)
-    edge_vertex_id_pairs_list.append([vertex1,vertex2])
-    connected_dict[vertex1].append(vertex2)
-    connected_dict[vertex2].append(vertex1)
-
-edge_vertex_id_pairs=np.array(edge_vertex_id_pairs_list)
-
-finish_generate=time.time()
-
-#vertex_ids = np.array([0, 2, 4, 6, 10])
-#edge_ids = np.array([1, 3, 5, 7, 8, 9])
-#edge_vertex_id_pairs = np.array([[0, 2], [0, 4], [0, 6], [2, 4], [4, 6], [2, 10]])
-#edge_enabled = np.array([True, True, True,False,False,True])
-#source_vertex_id = 0
-
-
-#vertex_ids = np.array([0, 1, 2, 3, 4])
-#edge_ids = np.array([5, 6, 7, 8])
-#edge_vertex_id_pairs = np.array([[0, 1], [1, 2], [2, 3], [3, 4]]) #will look like: 0-1-2-3
-#edge_enabled = np.array([True, True, True,False])
-#source_vertex_id = 0
-
-print("generated network")
-
-init_start=time.time()
-graph = GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-init_finish=time.time()
-
-print("initialized")
-
-alt_edges_start=time.time()
-alternative_edges=graph.find_alternative_edges(edge_ids[number_of_vertices//10])
-alt_edges_finish=time.time()
-
-print(alternative_edges)
-print("amount of alternative edges= "+str(len(alternative_edges)))
-print("init time= "+str(init_finish-init_start))
-print("alt edges time= "+str(alt_edges_finish-alt_edges_start))
-print("generate time= "+str(finish_generate-start_generate))
-"""
