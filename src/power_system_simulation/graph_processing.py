@@ -91,7 +91,7 @@ class GraphProcessor:
         self.edge_enabled = edge_enabled
         self.source_vertex_id = source_vertex_id
 
-        if np.any(vertex_ids <= 0):
+        if np.any(vertex_ids < 0):
             raise NegativeVertexIDError("Vertex ID must be a positive interger!")
 
         if not issubclass(vertex_ids.dtype.type, np.integer):
@@ -111,22 +111,17 @@ class GraphProcessor:
         if len(edge_ids) != len(set(edge_ids)):  # Checks edge_ids are unique
             raise IDNotUniqueError("Edge IDs must be unique!")
 
-        if len(edge_ids) != len(set(edge_ids)):
-            raise IDNotUniqueError("Edge IDs must be unique")
-
         if len(edge_ids) != len(edge_vertex_id_pairs):
             raise InputLengthDoesNotMatchError("Length of edge_ids does not match the length of edge_vertex_id_pairs!")
 
         for pair in edge_vertex_id_pairs:
             if pair[0] not in vertex_ids or pair[1] not in vertex_ids:
                 if pair[0] not in vertex_ids:
-                    raise IDNotFoundError(
-                        "Values in edge_vertex_id_pairs must be valid vertex IDs, value: "
-                        + str(pair[0])
-                        + " not found!"
-                    )
+                    incorrect_value=pair[0]
+                else:
+                    incorrect_value=pair[1]
                 raise IDNotFoundError(
-                    "Values in edge_vertex_id_pairs must be valid vertex IDs, value: " + str(pair[1]) + " not found!"
+                    "Values in edge_vertex_id_pairs must be valid vertex IDs, value: " + str(incorrect_value) + " not found!"
                 )
 
         if len(edge_enabled) != len(edge_ids):
@@ -187,6 +182,8 @@ class GraphProcessor:
         Returns:
             A list of all downstream vertices.
         """
+        if edge_id not in self.edge_ids:
+            raise IDNotFoundError("Given edge ID is not a valid edge ID!")
         # find vertices connected to the edge with ID: edge_id
         index_edge_downstream = np.where(self.edge_ids == edge_id)[0][0]
         edge_start = self.edge_vertex_id_pairs[index_edge_downstream]
