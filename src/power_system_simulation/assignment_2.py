@@ -9,6 +9,9 @@ We describe here the input of your task, and the expected functionalities.
 **You need to define the proper APIs including input data arguments for your package!**
 '''
 ## Input data
+
+
+
 '''
 For this assignment, you need to handle the following input.
 
@@ -17,6 +20,16 @@ For this assignment, you need to handle the following input.
 * A table containing reactive load profile of all the `sym_load` in the grid, with timestamps and load ids.
 * The above two tables has the same number of rows and columns. The timestamps and load ids will be matching.
 '''
+class powergridanalysis:
+    def __init__(self, 
+                 pgm_input: pgm.PGMInput,
+                 active_load_profile: np.ndarray,
+                 reactive_load_pofile: np.ndarray) -> None:
+      self.grid = pgm.PowerGridModel(pgm_input)
+      self.active_load_profile = active_load_profile
+      self.reactive_load_profile = reactive_load_pofile
+      pgm.assert_valid_input_data(input_data=pgm_input, calculation_type=CalculationType.power_flow) 
+    pass
 
 
 ## Functionalities
