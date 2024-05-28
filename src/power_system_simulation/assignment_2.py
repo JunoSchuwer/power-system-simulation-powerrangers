@@ -36,8 +36,19 @@ class powergridanalysis:
             raise ValidationException("Timestamps in active and reactive load profiles do not match.")
         if not self.active_load_profile.columns.equals(self.reactive_load_profile.columns):
             raise ValidationException("Load IDs in active and reactive load profiles do not match.")
+        
+    def create_batch_update_dataset(self) -> list:
+        dataset = []
+        timestamps = self.active_load_profile[:, 0]
+        for i, timestamp in enumerate(timestamps):
+            active_loads = self.active_load_profile[i, 1:]
+            reactive_loads = self.reactive_load_profile[i, 1:]
+            power_injections = active_loads + 1j * reactive_loads
+            dataset.append((timestamp, power_injections))
+        return dataset
     pass
 
+    
 
 ## Functionalities
 '''
