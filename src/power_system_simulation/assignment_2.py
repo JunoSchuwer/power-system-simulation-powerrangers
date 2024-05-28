@@ -1,22 +1,26 @@
 # Assignment 2: Power Grid Model
-
+import numpy as np
+import power_grid_model as pgm
+'''
 In Assignment 2 we are going to write a power grid calculation module
 with [`power-grid-model`](https://power-grid-model.readthedocs.io/en/stable/) as the calculation core.
 We describe here the input of your task, and the expected functionalities.
 
 **You need to define the proper APIs including input data arguments for your package!**
-
+'''
 ## Input data
-
+'''
 For this assignment, you need to handle the following input.
 
 * A power grid in PGM input format
 * A table containing active load profile of all the `sym_load` in the grid, with timestamps and load ids.
 * A table containing reactive load profile of all the `sym_load` in the grid, with timestamps and load ids.
 * The above two tables has the same number of rows and columns. The timestamps and load ids will be matching.
+'''
+
 
 ## Functionalities
-
+'''
 We expect that you implement the following functionalities, including some error handling.
 You need to test the error handling which is explicitely listed.
 
@@ -51,3 +55,4 @@ To read the PGM JSON file into PGM input format in the memory, you need to use [
 To read the load profiles into tables in the memory, you need to read from [`parquet`](https://parquet.apache.org/) files.
 For example, you can use [`pandas.read_parquet`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html)
 to read `parquet` files into `pandas.DataFrame`.
+'''
