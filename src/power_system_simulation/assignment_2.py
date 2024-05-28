@@ -9,7 +9,8 @@ We describe here the input of your task, and the expected functionalities.
 **You need to define the proper APIs including input data arguments for your package!**
 '''
 ## Input data
-
+class ValidationException(Exception):
+  pass
 
 
 '''
@@ -29,6 +30,12 @@ class powergridanalysis:
       self.active_load_profile = active_load_profile
       self.reactive_load_profile = reactive_load_pofile
       pgm.assert_valid_input_data(input_data=pgm_input, calculation_type=CalculationType.power_flow) 
+
+    def _validate_input_profiles(self) -> None:
+        if not self.active_load_profile.index.equals(self.reactive_load_profile.index):
+            raise ValidationException("Timestamps in active and reactive load profiles do not match.")
+        if not self.active_load_profile.columns.equals(self.reactive_load_profile.columns):
+            raise ValidationException("Load IDs in active and reactive load profiles do not match.")
     pass
 
 
@@ -67,5 +74,3 @@ To read the PGM JSON file into PGM input format in the memory, you need to use [
 
 To read the load profiles into tables in the memory, you need to read from [`parquet`](https://parquet.apache.org/) files.
 For example, you can use [`pandas.read_parquet`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html)
-to read `parquet` files into `pandas.DataFrame`.
-'''
