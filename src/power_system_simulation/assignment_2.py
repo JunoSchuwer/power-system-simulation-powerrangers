@@ -12,7 +12,6 @@ We describe here the input of your task, and the expected functionalities.
 class ValidationException(Exception):
   pass
 
-
 '''
 For this assignment, you need to handle the following input.
 
@@ -89,3 +88,4 @@ To read the PGM JSON file into PGM input format in the memory, you need to use [
 
 To read the load profiles into tables in the memory, you need to read from [`parquet`](https://parquet.apache.org/) files.
 For example, you can use [`pandas.read_parquet`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html)
+'''
