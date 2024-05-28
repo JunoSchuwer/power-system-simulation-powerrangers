@@ -25,17 +25,21 @@ class powergridanalysis:
     def __init__(self, 
                  pgm_input: pgm.PGMInput,
                  active_load_profile: np.ndarray,
-                 reactive_load_pofile: np.ndarray) -> None:
+                 reactive_load_profile: np.ndarray) -> None:
       self.grid = pgm.PowerGridModel(pgm_input)
       self.active_load_profile = active_load_profile
-      self.reactive_load_profile = reactive_load_pofile
+      self.reactive_load_profile = reactive_load_profile
       pgm.assert_valid_input_data(input_data=pgm_input, calculation_type=CalculationType.power_flow) 
 
     def _validate_input_profiles(self) -> None:
-        if not self.active_load_profile.index.equals(self.reactive_load_profile.index):
-            raise ValidationException("Timestamps in active and reactive load profiles do not match.")
-        if not self.active_load_profile.columns.equals(self.reactive_load_profile.columns):
-            raise ValidationException("Load IDs in active and reactive load profiles do not match.")
+        if self.active_load_profile.shape[0] != self.reactive_load_profile.shape[0]:
+          raise ValidationException("The number of timestamps in active and reactive load profiles do not match.")
+        if self.active_load_profile.shape[1] != self.reactive_load_profile.shape[1]:
+          raise ValidationException("The number of load IDs in active and reactive load profiles do not match.")
+        if not np.array_equal(self.active_load_profile[:, 0], self.reactive_load_profile[:, 0]):
+          raise ValidationException("Timestamps in active and reactive load profiles do not match.")
+        if not np.array_equal(self.active_load_profile[0, 1:], self.reactive_load_profile[0, 1:]):
+          raise ValidationException("Load IDs in active and reactive load profiles do not match.")
         
     def create_batch_update_dataset(self) -> list:
         dataset = []
