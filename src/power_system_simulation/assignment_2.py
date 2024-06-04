@@ -1,7 +1,19 @@
 # Assignment 2: Power Grid Model
-from typing import Dict
 import numpy as np
 import power_grid_model as pgm
+import pandas as pd
+from typing import Dict
+from power_grid_model.utils import json_deserialize
+from power_grid_model import (
+    PowerGridModel,
+    CalculationType,
+    CalculationMethod,
+    initialize_array
+)
+from power_grid_model.validation import (
+    assert_valid_input_data,
+    assert_valid_batch_data
+)
 '''
 In Assignment 2 we are going to write a power grid calculation module
 with [`power-grid-model`](https://power-grid-model.readthedocs.io/en/stable/) as the calculation core.
@@ -21,12 +33,24 @@ For this assignment, you need to handle the following input.
 * A table containing reactive load profile of all the `sym_load` in the grid, with timestamps and load ids.
 * The above two tables has the same number of rows and columns. The timestamps and load ids will be matching.
 '''
-def power_grid_calc(
-    input_network_data: Dict, active_power_profile_path: str, reactive_power_profile_path: str) -> Dict:
-  
+def power_grid_calc(input_network_data: Dict)->Dict:
+
+  with open(input_network_data) as ind:
+    input_data=json_deserialize(ind.read())
+
+  #validate input data
+  assert_valid_input_data(input_data=input_data, calculation_type=CalculationType.power_flow)
+
+  #construct model
+  model = PowerGridModel(input_data=input_data)
+  print(model.all_component_count)
+
   return
 
-    
+input_network_data = "src/data/input/input_network_data.json"
+power_grid_calc(input_network_data)
+
+
 
 ## Functionalities
 '''
