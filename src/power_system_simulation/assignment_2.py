@@ -1,4 +1,5 @@
 # Assignment 2: Power Grid Model
+from typing import Dict
 import numpy as np
 import power_grid_model as pgm
 '''
@@ -20,36 +21,10 @@ For this assignment, you need to handle the following input.
 * A table containing reactive load profile of all the `sym_load` in the grid, with timestamps and load ids.
 * The above two tables has the same number of rows and columns. The timestamps and load ids will be matching.
 '''
-class powergridanalysis:
-    def __init__(self, 
-                 pgm_input: pgm.PGMInput,
-                 active_load_profile: np.ndarray,
-                 reactive_load_profile: np.ndarray) -> None:
-      self.grid = pgm.PowerGridModel(pgm_input)
-      self.active_load_profile = active_load_profile
-      self.reactive_load_profile = reactive_load_profile
-      pgm.assert_valid_input_data(input_data=pgm_input, calculation_type=CalculationType.power_flow) 
-
-    def _validate_input_profiles(self) -> None:
-        if self.active_load_profile.shape[0] != self.reactive_load_profile.shape[0]:
-          raise ValidationException("The number of timestamps in active and reactive load profiles do not match.")
-        if self.active_load_profile.shape[1] != self.reactive_load_profile.shape[1]:
-          raise ValidationException("The number of load IDs in active and reactive load profiles do not match.")
-        if not np.array_equal(self.active_load_profile[:, 0], self.reactive_load_profile[:, 0]):
-          raise ValidationException("Timestamps in active and reactive load profiles do not match.")
-        if not np.array_equal(self.active_load_profile[0, 1:], self.reactive_load_profile[0, 1:]):
-          raise ValidationException("Load IDs in active and reactive load profiles do not match.")
-        
-    def create_batch_update_dataset(self) -> list:
-        dataset = []
-        timestamps = self.active_load_profile[:, 0]
-        for i, timestamp in enumerate(timestamps):
-            active_loads = self.active_load_profile[i, 1:]
-            reactive_loads = self.reactive_load_profile[i, 1:]
-            power_injections = active_loads + 1j * reactive_loads
-            dataset.append((timestamp, power_injections))
-        return dataset
-    pass
+def power_grid_calc(
+    input_network_data: Dict, active_power_profile_path: str, reactive_power_profile_path: str) -> Dict:
+  
+  return
 
     
 
