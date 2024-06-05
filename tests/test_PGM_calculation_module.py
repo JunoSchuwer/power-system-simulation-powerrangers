@@ -21,7 +21,7 @@ path_output_table_row_per_timestamp = "tests/data/expected_output/output_table_r
 output_table_row_per_line = pd.read_parquet(path_output_table_row_per_line)
 output_table_row_per_timestamp = pd.read_parquet(path_output_table_row_per_timestamp)
 
-# make folder location for incorrect data:
+# make folder location for incorrect data (if it does not exist yet):
 incorrect_folder_path = "tests/data/incorrect_input_data"
 if not os.path.exists(incorrect_folder_path):
     os.makedirs(incorrect_folder_path)
