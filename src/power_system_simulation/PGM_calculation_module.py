@@ -1,28 +1,54 @@
-# Assignment 2: Power Grid Model
-from typing import Dict
+"""
+power-grid-model calculation module
+
+Raises:
+    ProfilesNotMatchingError:  if the two profiles does not have matching timestamps and/or load ids
+    ValidationException: if input data is invalid or if batch dataset is invalid
+
+Returns:
+    pd.dataFrame -> max/min line loading over entire time span
+    pd.dataFrame -> max/min node voltage for each moment in time
+"""
+
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
-import power_grid_model as pgm
 from power_grid_model import CalculationMethod, CalculationType, PowerGridModel, initialize_array
 from power_grid_model.utils import json_deserialize
 from power_grid_model.validation import assert_valid_batch_data, assert_valid_input_data
 
 
-class ProfileNotMatchingError(Exception):
+class ProfilesNotMatchingError(Exception):
     """Error raised when active and reactive load profiles do not have matching timestamps and/or load ids"""
 
 
-def PGM_calculation(input_network_data: Dict, path_active_power_profile: str, path_reactive_power_profile: str):
+def pgm_calculation(
+    input_network_data: str, path_active_power_profile: str, path_reactive_power_profile: str
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    # pylint: disable=R0914
+    """
+    Calculation model which outputs data about line loading and node voltage over time,
+    using the power-grid-model library.
+
+    Args:
+      input_network_data: path to .json file containing network data
+      path_active_power_profile: path to .parquet file containing active power profile
+      path_reactive_power_profile: path to .parquet file containing reactive power profile
+
+    Returns:
+      pd.dataFrame -> max/min line loading over entire time span
+      pd.dataFrame -> max/min node voltage for each moment in time
+    """
 
     # deserialize json file of network
-    with open(input_network_data) as ind:
+    with open(input_network_data, encoding="utf-8") as ind:
         input_data = json_deserialize(ind.read())
 
     # load parquet files of active and reactive power
     active_power_profile = pd.read_parquet(path_active_power_profile)
     reactive_power_profile = pd.read_parquet(path_reactive_power_profile)
-    print(reactive_power_profile)
+
     # validate input data, raises `ValidationException`
     assert_valid_input_data(input_data=input_data, calculation_type=CalculationType.power_flow)
 
@@ -31,9 +57,9 @@ def PGM_calculation(input_network_data: Dict, path_active_power_profile: str, pa
 
     # check if IDs and timestamps match
     if (active_power_profile.columns != reactive_power_profile.columns).any():
-        raise ProfileNotMatchingError("Load IDs of active and reactive power do not match!")
+        raise ProfilesNotMatchingError("Load IDs of active and reactive power do not match!")
     if not active_power_profile.index.equals(reactive_power_profile.index):
-        raise ProfileNotMatchingError("Timestamps of active and reactive power do not match!")
+        raise ProfilesNotMatchingError("Timestamps of active and reactive power do not match!")
 
     # Create a PGM batch update dataset with the active and reactive load profiles
     batch_update_dataset = initialize_array("update", "sym_load", active_power_profile.shape)
@@ -80,8 +106,8 @@ def PGM_calculation(input_network_data: Dict, path_active_power_profile: str, pa
     # Aggregate the power flow: each row representing a line, with:
     # max and min loading in p.u. of the specific line across all timeline + Energy losses in KWh
     max_min_line_loading = []
-    for id_idx, id in enumerate(np.unique(line_id)):
-        loads = line_loading[line_id == id]
+    for id_idx, line_id_i in enumerate(np.unique(line_id)):
+        loads = line_loading[line_id == line_id_i]
         load_max, time_load_max, load_min, time_load_min = (
             loads.max(),
             timestamps[loads.argmax()],
@@ -90,7 +116,7 @@ def PGM_calculation(input_network_data: Dict, path_active_power_profile: str, pa
         )
         e_losses = abs(p_from[:, id_idx] + p_to[:, id_idx])  # p_from and p_to are in Watts
         e_losses_kwh = np.trapz(e_losses) / 1000
-        max_min_line_loading.append([id, e_losses_kwh, load_max, time_load_max, load_min, time_load_min])
+        max_min_line_loading.append([line_id_i, e_losses_kwh, load_max, time_load_max, load_min, time_load_min])
 
     # convert from list of lists to pandas dataframe (table)
     max_min_voltage_df_columns = [
@@ -115,21 +141,3 @@ def PGM_calculation(input_network_data: Dict, path_active_power_profile: str, pa
     max_min_line_loading_df.set_index("Line_ID", inplace=True)
 
     return max_min_voltage_df, max_min_line_loading_df
-
-
-"""
-#run some tests with test data
-input_network_data = "tests/data/input/input_network_data.json"
-path_active_profile = "tests/data/input/active_power_profile.parquet"
-path_reactive_profile = "tests/data/input/reactive_power_profile.parquet"
-max_min_voltages, max_min_line_loading=PGM_calculation(input_network_data, path_active_profile, path_reactive_profile)
-
-print(max_min_voltages)
-print(max_min_line_loading)
-
-#to test load IDs not matching:
-#active_power_profile = active_power_profile.rename(columns={8:222})
-
-#to test timestamps not matching:
-#active_power_profile.rename(index={pd.Timestamp("2024-01-01 00:00:00"):pd.Timestamp("2000-01-01 00:00:00")}, inplace=True)
-"""
