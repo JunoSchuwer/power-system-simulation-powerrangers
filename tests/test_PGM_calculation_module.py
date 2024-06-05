@@ -27,7 +27,7 @@ if not os.path.exists(incorrect_folder_path):
     os.makedirs(incorrect_folder_path)
 
 
-def test_PGM_calculation():
+def test_pgm_calculation():
     max_min_voltages, max_min_line_loading = pgm_calculation(
         input_network_data, path_active_profile, path_reactive_profile
     )
