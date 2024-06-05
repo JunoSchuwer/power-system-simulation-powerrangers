@@ -8,12 +8,12 @@ from power_system_simulation.PGM_calculation_module import PGM_calculation, Prof
 
 
 #test data
-input_network_data = "src/data/input/input_network_data.json"
-path_active_profile = "src/data/input/active_power_profile.parquet"
-path_reactive_profile = "src/data/input/reactive_power_profile.parquet"
+input_network_data = "tests/data/input/input_network_data.json"
+path_active_profile = "tests/data/input/active_power_profile.parquet"
+path_reactive_profile = "tests/data/input/reactive_power_profile.parquet"
 
-path_output_table_row_per_line="src/data/expected_output/output_table_row_per_line.parquet"
-path_output_table_row_per_timestamp="src/data/expected_output/output_table_row_per_timestamp.parquet"
+path_output_table_row_per_line="tests/data/expected_output/output_table_row_per_line.parquet"
+path_output_table_row_per_timestamp="tests/data/expected_output/output_table_row_per_timestamp.parquet"
 
 output_table_row_per_line=pd.read_parquet(path_output_table_row_per_line)
 output_table_row_per_timestamp=pd.read_parquet(path_output_table_row_per_timestamp)
@@ -23,17 +23,7 @@ output_table_row_per_timestamp=pd.read_parquet(path_output_table_row_per_timesta
 def test_PGM_calculation():
     max_min_voltages, max_min_line_loading=PGM_calculation(input_network_data, path_active_profile, path_reactive_profile)
     assert max_min_voltages.equals(output_table_row_per_timestamp)
-    assert max_min_line_loading.equals(output_table_row_per_line)
+    assert (max_min_line_loading.round(13)).equals(output_table_row_per_line.round(13)) #round since 14th number after comma is different
 
-
-
-
-max_min_voltages, max_min_line_loading=PGM_calculation(input_network_data, path_active_profile, path_reactive_profile)
-#why
-print(max_min_line_loading.compare(output_table_row_per_line, result_names=("our function", "correct")))
-
-#lol i guess this is not the correct answer then
-print(max_min_line_loading.loc[7, 'Total_Loss'])
-print(output_table_row_per_line.loc[7, 'Total_Loss'])
-
-test_PGM_calculation()
+def test_invalid_input_data():
+    pass

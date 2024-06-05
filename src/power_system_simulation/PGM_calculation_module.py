@@ -22,7 +22,7 @@ def PGM_calculation(input_network_data: Dict, path_active_power_profile: str, pa
     # load parquet files of active and reactive power
     active_power_profile = pd.read_parquet(path_active_power_profile)
     reactive_power_profile = pd.read_parquet(path_reactive_power_profile)
-
+    print(reactive_power_profile)
     # validate input data, raises `ValidationException`
     assert_valid_input_data(input_data=input_data, calculation_type=CalculationType.power_flow)
 
@@ -119,9 +119,9 @@ def PGM_calculation(input_network_data: Dict, path_active_power_profile: str, pa
 
 """
 #run some tests with test data
-input_network_data = "src/data/input/input_network_data.json"
-path_active_profile = "src/data/input/active_power_profile.parquet"
-path_reactive_profile = "src/data/input/reactive_power_profile.parquet"
+input_network_data = "tests/data/input/input_network_data.json"
+path_active_profile = "tests/data/input/active_power_profile.parquet"
+path_reactive_profile = "tests/data/input/reactive_power_profile.parquet"
 max_min_voltages, max_min_line_loading=PGM_calculation(input_network_data, path_active_profile, path_reactive_profile)
 
 print(max_min_voltages)
