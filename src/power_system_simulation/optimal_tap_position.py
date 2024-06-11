@@ -16,10 +16,7 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
     active_power_profile = pd.read_parquet(path_active_power_profile)
     reactive_power_profile = pd.read_parquet(path_reactive_power_profile)
 
-    min_pos = input_data["transformer"]["tap_min"][0]
-    max_pos = input_data["transformer"]["tap_max"][0]
-
-    for tap_pos in range(min_pos, max_pos):
+    for tap_pos in range(input_data["transformer"]["tap_min"][0], input_data["transformer"]["tap_max"][0]):
         input_data["transformer"]["tap_min"][0] = tap_pos
 
         json_serialize_to_file(input_network_data, input_data)
@@ -30,7 +27,7 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
             avg_deviation_max_v_node = ((max_min_voltage_df["Max_Voltage"] - 1).abs()).mean()
             avg_deviation_min_v_node = ((max_min_voltage_df["Min_Voltage"] - 1).abs()).mean()
             avg_voltage_deviation = (avg_deviation_max_v_node + avg_deviation_min_v_node) / 2
-            if tap_pos == min_pos:
+            if tap_pos == input_data["transformer"]["tap_min"][0]:
                 is_lower = avg_voltage_deviation
                 store_pos = tap_pos
             if avg_voltage_deviation < is_lower:
@@ -39,7 +36,7 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
 
         if mode == 1:
             total_losses = max_min_line_loading_df["Total_Loss"]
-            if tap_pos == min_pos:
+            if tap_pos == input_data["transformer"]["tap_min"][0]:
                 is_lower = total_losses
                 store_pos = tap_pos
             if total_losses < is_lower:
