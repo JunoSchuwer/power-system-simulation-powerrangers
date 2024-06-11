@@ -1,12 +1,16 @@
-from power_system_simulation.pgm_calculation_module import *
-from power_grid_model.utils import json_deserialize, json_serialize_to_file
 import pandas as pd
+from power_grid_model.utils import json_deserialize, json_serialize_to_file
+from power_system_simulation.pgm_calculation_module import *
 
-class invalidmode(Exception):
-    pass 
+class InvalidMode(Exception):
+    """Exception raised for an invalid mode, mode should be either 0(voltage) or 1(losses)"""
+    pass
 
 def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, path_reactive_power_profile: str, mode=0):
-
+    '''Function takes 3 input a network, power profiles, and a mode which should either be 0 or 1 where 0 is minimum voltage diffrentation and 1 is minimum losses. 
+    processes them then uses pgm_calculation_module to get aggregated data frames containing max, min voltage and line losses.
+    this is then proccesed to find an optimum tap by running the function for every possible tap position,
+    which is then compared to a previous value.'''
     if mode not in [0, 1]:
         raise invalidmode("Mode must either be 0 or 1")
 
@@ -21,11 +25,11 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
 
         json_serialize_to_file(input_network_data, input_data)
 
-        max_min_voltage_df, max_min_line_loading_df = pgm_calculation(input_data, active_power_profile, reactive_power_profile)
+        voltage_df, loading_df = pgm_calculation(input_data, active_power_profile, reactive_power_profile)
 
         if mode == 0:
-            avg_deviation_max_v_node = ((max_min_voltage_df["Max_Voltage"] - 1).abs()).mean()
-            avg_deviation_min_v_node = ((max_min_voltage_df["Min_Voltage"] - 1).abs()).mean()
+            avg_deviation_max_v_node = ((voltage_df["Max_Voltage"] - 1).abs()).mean()
+            avg_deviation_min_v_node = ((voltage_df["Min_Voltage"] - 1).abs()).mean()
             avg_voltage_deviation = (avg_deviation_max_v_node + avg_deviation_min_v_node) / 2
             if tap_pos == input_data["transformer"]["tap_min"][0]:
                 is_lower = avg_voltage_deviation
@@ -35,7 +39,7 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
                 store_pos = tap_pos
 
         if mode == 1:
-            total_losses = max_min_line_loading_df["Total_Loss"]
+            total_losses = loading_df["Total_Loss"]
             if tap_pos == input_data["transformer"]["tap_min"][0]:
                 is_lower = total_losses
                 store_pos = tap_pos
