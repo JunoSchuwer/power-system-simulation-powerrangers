@@ -23,10 +23,32 @@ def optimal_tap_pos(
 
     min_pos = input_data["transformer"]["tap_min"][0]
     max_pos = input_data["transformer"]["tap_max"][0]
+    intial_pos= input_data["transformer"]["tap_pos"][0]
+    for tap_pos in range(min_pos, max_pos):
+        input_data["transformer"]["tap_min"][0]= tap_pos
 
-    for pos in range(max_pos, min_pos):
-        input_data["transformer"]["tap_min"][0]= pos
+        json_serialize_to_file(input_network_data,input_data)
+
         max_min_voltage_df, max_min_line_loading_df=pgm_calculation_module(input_data,active_power_profile,reactive_power_profile)
-        avg_deviation_max_v_node= ((max_min_voltage_df["Max_Voltage"]-1).abs()).mean()
-        avg_deviation_min_v_node= ((max_min_voltage_df["Min_Voltage"]-1).abs()).mean()
-    return 
+
+        if mode ==0:
+            avg_deviation_max_v_node= ((max_min_voltage_df["Max_Voltage"]-1).abs()).mean()
+            avg_deviation_min_v_node= ((max_min_voltage_df["Min_Voltage"]-1).abs()).mean()
+            avg_voltage_deviation= (avg_deviation_max_v_node+avg_deviation_min_v_node)/2
+            if tap_pos == min_pos:
+                is_lower=avg_voltage_deviation
+                store_pos=tap_pos
+            if avg_voltage_deviation <is_lower:
+                is_lower=avg_voltage_deviation
+                store_pos=tap_pos
+
+        if mode == 1:
+            total_losses=max_min_line_loading_df["Total_Loss"]
+            if tap_pos == min_pos
+                is_lower=total_losses
+                store_pos=tap_pos
+            if total_losses<is_lower
+                is_lower=total_losses
+                store_pos=tap_pos
+
+    return tap_pos
