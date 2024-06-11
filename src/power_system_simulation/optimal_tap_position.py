@@ -1,11 +1,9 @@
-import numpy as np
 from pgm_calculation_module import *
-from power_grid_model._utils import json_deserialize, json_serialize_to_file
-
+from power_grid_model.utils import json_deserialize, json_serialize_to_file
+import pandas as pd
 
 class invalidmode(Exception):
-    pass
-
+    pass 
 
 def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, path_reactive_power_profile: str, mode=0):
 
@@ -26,9 +24,7 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
 
         json_serialize_to_file(input_network_data, input_data)
 
-        max_min_voltage_df, max_min_line_loading_df = pgm_calculation_module(
-            input_data, active_power_profile, reactive_power_profile
-        )
+        max_min_voltage_df, max_min_line_loading_df = pgm_calculation_module(input_data, active_power_profile, reactive_power_profile)
 
         if mode == 0:
             avg_deviation_max_v_node = ((max_min_voltage_df["Max_Voltage"] - 1).abs()).mean()
