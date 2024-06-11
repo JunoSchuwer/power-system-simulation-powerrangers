@@ -4,15 +4,16 @@ from power_system_simulation.pgm_calculation_module import *
 
 class InvalidMode(Exception):
     """Exception raised for an invalid mode, mode should be either 0(voltage) or 1(losses)"""
-    pass
 
 def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, path_reactive_power_profile: str, mode=0):
-    '''Function takes 3 input a network, power profiles, and a mode which should either be 0 or 1 where 0 is minimum voltage diffrentation and 1 is minimum losses. 
-    processes them then uses pgm_calculation_module to get aggregated data frames containing max, min voltage and line losses.
-    this is then proccesed to find an optimum tap by running the function for every possible tap position,
-    which is then compared to a previous value.'''
+    '''Function takes 3 inputs: a network, power profiles, and a mode. The mode should either be 0 or 1 where 0 is 
+    minimum voltage differentiation and 1 is minimum losses. The function processes the inputs, then uses 
+    pgm_calculation_module to get data frames containing max, min voltage, and line losses. This is then processed 
+    to find an optimum tap by running the function for every possible tap position, which is then compared to a 
+    previous value.'''
+
     if mode not in [0, 1]:
-        raise invalidmode("Mode must either be 0 or 1")
+        raise InvalidMode("Mode must either be 0 or 1")
 
     with open(input_network_data, encoding="utf-8") as ind:
         input_data = json_deserialize(ind.read())
