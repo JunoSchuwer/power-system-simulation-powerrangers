@@ -58,8 +58,8 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
     # create power profile batch update data
     model_tap.create_batch_update_data(path_active_power_profile, path_reactive_power_profile)
 
-    optimal_tap_pos_value=0
-    
+    optimal_tap_pos_value = 0
+
     for tap_pos in range(min_pos, max_pos + 1):
         # create model update data:
         update_tap_pos = initialize_array("update", "transformer", 1)
