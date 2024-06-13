@@ -6,6 +6,7 @@ system network. The main goal is to achieve optimal power distribution by adjust
 """
 
 import pandas as pd
+import numpy as np
 from power_grid_model.utils import json_deserialize, json_serialize_to_file
 from power_system_simulation.pgm_calculation_module import pgm_calculation
 
@@ -33,7 +34,6 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
     position by iterating through all possible tap positions, comparing voltage deviations or losses as per the mode
     """
 
-
     if mode not in [0, 1]:
         raise InvalidMode("Mode must either be 0 or 1")
 
@@ -42,9 +42,11 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
 
     active_power_profile = pd.read_parquet(path_active_power_profile)
     reactive_power_profile = pd.read_parquet(path_reactive_power_profile)
+    min_pos=np.take(input_data["transformer"]["tap_min"],0)
+    max_pos=np.take(input_data["transformer"]["tap_max"],0)
 
-    for tap_pos in range(input_data["transformer"]["tap_min"][0], input_data["transformer"]["tap_max"][0]+1):
-        input_data["transformer"]["tap_min"][0] = tap_pos
+    for tap_pos in range(max_pos+1,min_pos):
+        input_data["transformer"]["tap_pos"][0] = tap_pos
 
         json_serialize_to_file(input_network_data, input_data)
 
@@ -54,19 +56,19 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
             avg_deviation_max_v_node = ((voltage_df["Max_Voltage"] - 1).abs()).mean()
             avg_deviation_min_v_node = ((voltage_df["Min_Voltage"] - 1).abs()).mean()
             avg_voltage_deviation = (avg_deviation_max_v_node + avg_deviation_min_v_node) / 2
-            if tap_pos == input_data["transformer"]["tap_min"][0]:
+            if tap_pos == min_pos:
                 is_lower = avg_voltage_deviation
                 store_pos = tap_pos
-            if avg_voltage_deviation < is_lower:
+            elif avg_voltage_deviation < is_lower:
                 is_lower = avg_voltage_deviation
                 store_pos = tap_pos
 
-        if mode == 1:
+        elif mode == 1:
             total_losses = loading_df["Total_Loss"]
-            if tap_pos == input_data["transformer"]["tap_min"][0]:
+            if tap_pos == min_pos:
                 is_lower = total_losses
                 store_pos = tap_pos
-            if total_losses < is_lower:
+            elif total_losses < is_lower:
                 is_lower = total_losses
                 store_pos = tap_pos
 

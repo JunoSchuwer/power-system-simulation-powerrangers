@@ -30,17 +30,19 @@ Methods:
         Raises IDNotFoundError if the edge ID is invalid.
 
     find_alternative_edges(disabled_edge_id):
-        Returns a list of alternative edge IDs that can be enabled to maintain graph connectivity and acyclicity after disabling the specified edge.
+        Returns a list of alternative edge IDs that can be enabled to 
+        maintain graph connectivity and acyclicityafter disabling the specified edge.
         Raises IDNotFoundError if the edge ID is invalid, EdgeAlreadyDisabledError if the edge is already disabled.
 
     create_children_parent_dictonary(start_vertex_id):
         Performs a depth-first search to construct parent-child relationships starting from the source vertex.
 
     create_network_dict():
-        Constructs a dictionary mapping each vertex to its connected vertices and another mapping to edge IDs for those connections.
+        Constructs a dictionary mapping each vertex to its connected vertices 
+        and another mapping to edge IDs for those connections.
 """
 
-from typing import List, Tuple
+from typing import List
 import networkx as nx
 import numpy as np
 
@@ -64,18 +66,16 @@ class GraphCycleError(Exception):
 
 class EdgeAlreadyDisabledError(Exception):
     '''Exception raises when an edge is disabled'''
-    pass
-
 
 class NegativeVertexIDError(Exception):
     '''Exception raises when an ID is invalid'''
 
 class GraphProcessor:
     """
-        Initializes the GraphProcessor with vertex IDs, edge IDs, edge vertex pairs, edge statuses, and source vertex ID.
+        Initializes the GraphProcessor with vertex IDs, edge IDs, edge vertex pairs, edge statuses, and source vertex ID
         
-        Validates the input data to ensure all IDs are integers, unique, and correctly linked. Checks for graph connectivity 
-        and acyclicity, raising appropriate exceptions if any conditions are violated.
+        Validates the input data to ensure all IDs are integers, unique, and correctly linked. Checks for graph
+        connectivity and acyclicity, raising appropriate exceptions if any conditions are violated.
         
         Args:
             vertex_ids: An array of vertex IDs.
@@ -99,9 +99,8 @@ class GraphProcessor:
         edge_ids: np.ndarray,
         edge_vertex_id_pairs: np.ndarray,
         edge_enabled: np.ndarray,
-        source_vertex_id: int,
-        ) -> None:
-    
+        source_vertex_id: int,) -> None:   
+         
         self.vertex_ids = vertex_ids
         self.edge_ids = edge_ids
         self.edge_vertex_id_pairs = edge_vertex_id_pairs
@@ -161,8 +160,7 @@ class GraphProcessor:
 
         if not nx.is_connected(self.graph_connection):
             raise GraphNotFullyConnectedError("The graph is not fully connected!")
-
-        
+        #pylint:ex
         try:
             nx.find_cycle(self.graph_cycles)
         except:
@@ -170,7 +168,6 @@ class GraphProcessor:
         else:
             raise GraphCycleError("The graph contains cycles!")
         
-
         # create children and parent dictionary used in other functions:
         self.network_dict = {}
         self.network_dict_edge_id = {}
