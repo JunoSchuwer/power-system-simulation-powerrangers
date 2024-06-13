@@ -31,7 +31,8 @@ from power_system_simulation.pgm_calculation_module import (
 )
 
 # import test function if available:
-change_data_for_test=False
+# pylint: disable=C0103
+change_data_for_test = False
 if os.path.isfile("tests/test_input_data_validity_check.py"):
     FILE_PATH = "tests/test_input_data_validity_check.py"
     FUNCTION_NAME = "change_data_for_test"
