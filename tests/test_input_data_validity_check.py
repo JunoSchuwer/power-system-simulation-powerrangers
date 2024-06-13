@@ -11,8 +11,7 @@ from power_system_simulation.graph_processing import *
 from power_system_simulation.input_data_validity_check import *
 from power_system_simulation.pgm_calculation_module import (
     ProfileLoadIDsNotMatchingError,
-    ProfileTimestampsNotMatchingError,
-    pgm_calculation,
+    ProfileTimestampsNotMatchingError
 )
 
 
