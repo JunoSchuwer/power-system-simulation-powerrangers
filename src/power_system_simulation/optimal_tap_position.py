@@ -50,13 +50,13 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
 
         json_serialize_to_file(input_network_data, input_data)
 
-        voltage_df, loading_df = pgm_calculation(input_data, active_power_profile, reactive_power_profile)
+        voltage_df, loading_df = pgm_calculation(input_network_data, path_active_power_profile, path_reactive_power_profile)
 
         if mode == 0:
             avg_deviation_max_v_node = ((voltage_df["Max_Voltage"] - 1).abs()).mean()
             avg_deviation_min_v_node = ((voltage_df["Min_Voltage"] - 1).abs()).mean()
             avg_voltage_deviation = (avg_deviation_max_v_node + avg_deviation_min_v_node) / 2
-            if tap_pos == min_pos:
+            if tap_pos == max_pos+1:
                 is_lower = avg_voltage_deviation
                 store_pos = tap_pos
             elif avg_voltage_deviation < is_lower:
@@ -65,7 +65,7 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
 
         elif mode == 1:
             total_losses = loading_df["Total_Loss"]
-            if tap_pos == min_pos:
+            if tap_pos == max_pos+1:
                 is_lower = total_losses
                 store_pos = tap_pos
             elif total_losses < is_lower:
