@@ -20,14 +20,14 @@ import os
 
 import numpy as np
 import pandas as pd
-from power_grid_model import  CalculationType
+from power_grid_model import CalculationType
 from power_grid_model.utils import json_deserialize
 from power_grid_model.validation import assert_valid_input_data
 
 from power_system_simulation.graph_processing import GraphProcessor
 from power_system_simulation.pgm_calculation_module import (
     ProfileLoadIDsNotMatchingError,
-    ProfileTimestampsNotMatchingError
+    ProfileTimestampsNotMatchingError,
 )
 
 # import test function if available:
@@ -39,6 +39,7 @@ if os.path.isfile("tests/test_input_data_validity_check.py"):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     change_data_for_test = getattr(module, FUNCTION_NAME)
+
 
 class MultipleTransformersError(Exception):
     """Error raised when LV grid has multiple transformers"""
@@ -188,9 +189,7 @@ def validate_input_data(
 
     # check for fully connected + no cycles using graph_processing.py:
     vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id = reformat_pgm_to_array(input_network)
-    GraphProcessor(
-        vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id
-    )
+    GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
 
 
 def reformat_pgm_to_array(input_network_data):

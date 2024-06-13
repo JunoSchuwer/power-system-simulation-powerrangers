@@ -71,9 +71,7 @@ def test_invalid_batch_dataset():
         "tests/data/incorrect_input_data/incorrect_batch_dataset_reactive_power_profile.parquet"
     )
     incorrect_active_power_profile.to_parquet(path_incorrect_active_profile, engine="pyarrow", compression="snappy")
-    incorrect_reactive_power_profile.to_parquet(
-        path_incorrect_reactive_profile, engine="pyarrow", compression="snappy"
-    )
+    incorrect_reactive_power_profile.to_parquet(path_incorrect_reactive_profile, engine="pyarrow", compression="snappy")
 
     # test wrong batch update (batch update sym_load id not in input network)
     with pytest.raises(ValidationException):
