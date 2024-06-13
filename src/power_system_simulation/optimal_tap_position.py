@@ -73,6 +73,8 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
         else:
             loading_df = model_tap.aggregate_line_loading()
 
+        optimal_tap_pos_value=0
+
         if mode == 0:
             avg_voltage_deviation = ((voltage_df[["Max_Voltage", "Min_Voltage"]] - 1).mean(axis=1)).mean()
 
