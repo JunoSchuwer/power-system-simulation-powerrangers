@@ -45,7 +45,13 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
     min_pos=np.take(input_data["transformer"]["tap_min"],0)
     max_pos=np.take(input_data["transformer"]["tap_max"],0)
 
-    for tap_pos in range(max_pos+1,min_pos):
+    if min_pos>max_pos:
+        temp_min_pos=max_pos
+        max_pos=min_pos
+        min_pos=temp_min_pos
+    
+
+    for tap_pos in range(min_pos, max_pos+1):
         input_data["transformer"]["tap_pos"][0] = tap_pos
 
         json_serialize_to_file(input_network_data, input_data)
@@ -53,30 +59,29 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
         voltage_df, loading_df = pgm_calculation(input_network_data, path_active_power_profile, path_reactive_power_profile)
 
         if mode == 0:
-            avg_deviation_max_v_node = ((voltage_df["Max_Voltage"] - 1).abs()).mean()
-            avg_deviation_min_v_node = ((voltage_df["Min_Voltage"] - 1).abs()).mean()
-            avg_voltage_deviation = (avg_deviation_max_v_node + avg_deviation_min_v_node) / 2
-            if tap_pos == max_pos+1:
-                is_lower = avg_voltage_deviation
-                store_pos = tap_pos
-            elif avg_voltage_deviation < is_lower:
-                is_lower = avg_voltage_deviation
-                store_pos = tap_pos
+            avg_voltage_deviation = ((voltage_df[["Max_Voltage", "Min_Voltage"]] - 1).mean(axis=1)).mean()
+
+            if tap_pos == min_pos:
+                min_deviation_value = avg_voltage_deviation
+                optimal_tap_pos_value = tap_pos
+            elif avg_voltage_deviation < min_deviation_value:
+                min_deviation_value = avg_voltage_deviation
+                optimal_tap_pos_value = tap_pos
 
         elif mode == 1:
-            total_losses = loading_df["Total_Loss"]
-            if tap_pos == max_pos+1:
-                is_lower = total_losses
-                store_pos = tap_pos
-            elif total_losses < is_lower:
-                is_lower = total_losses
-                store_pos = tap_pos
+            total_losses_tap = sum(loading_df["Total_Loss"])
+            if tap_pos==min_pos:
+                total_losses_min= total_losses_tap
+                optimal_tap_pos_value = tap_pos
+            elif total_losses_tap < total_losses_min:
+                total_losses_min = total_losses_tap
+                optimal_tap_pos_value = tap_pos
 
-    return store_pos
+    return optimal_tap_pos_value
 
 pth_input_network_data = "tests/data/small_network/input/input_network_data.json"
 pth_active_profile = "tests/data/small_network/input/active_power_profile.parquet"
 pth_reactive_profile = "tests/data/small_network/input/reactive_power_profile.parquet"
 
-pos=optimal_tap_pos(pth_input_network_data,pth_active_profile,pth_reactive_profile)
+pos=optimal_tap_pos(pth_input_network_data,pth_active_profile,pth_reactive_profile,0)
 print(pos)
