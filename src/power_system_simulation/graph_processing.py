@@ -148,19 +148,10 @@ class GraphProcessor:
             raise IDNotFoundError("Source vertex ID is not a valid vertex ID!")
 
         self.graph_cycles = nx.Graph()
-        self.graph_connection = nx.Graph()
 
         for i, row in enumerate(self.edge_vertex_id_pairs):  # Using enumerate for clarity
             if self.edge_enabled[i]:
                 self.graph_cycles.add_edge(row[0], row[1])
-            self.graph_connection.add_edge(row[0], row[1])  # Adding all edges for connection check
-
-        # Add all vertices to ensure they are included in the connectivity check
-        self.graph_connection.add_nodes_from(self.vertex_ids)
-
-        if not nx.is_connected(self.graph_connection):
-            raise GraphNotFullyConnectedError("The graph is not fully connected!")
-        #pylint:ex
         try:
             nx.find_cycle(self.graph_cycles)
         except:
@@ -174,6 +165,10 @@ class GraphProcessor:
         self.children_dict = {}
         self.parent_dict = {}
         self.create_children_parent_dictonary(self.source_vertex_id)
+
+        # check for fully connected
+        if len(self.children_dict) != len(vertex_ids):
+            raise GraphNotFullyConnectedError("The graph is not fully connected!")
 
     def find_downstream_vertices(self, edge_id: int) -> List[int]:
         """
