@@ -30,11 +30,14 @@ incorrect_folder_path = "tests/data/incorrect_input_data"
 if not os.path.exists(incorrect_folder_path):
     os.makedirs(incorrect_folder_path)
 
+model_pgm=pgm_calculation()
 
 def test_pgm_calculation():
-    max_min_voltages, max_min_line_loading = pgm_calculation(
-        input_network_data, path_active_profile, path_reactive_profile
-    )
+    model_pgm.create_pgm(input_network_data)
+    model_pgm.create_batch_update_data(path_active_profile, path_reactive_profile)
+    model_pgm.run_power_flow_calculation()
+    max_min_voltages=model_pgm.aggregate_voltages()
+    max_min_line_loading=model_pgm.aggregate_line_loading()
     assert max_min_voltages.equals(output_table_row_per_timestamp)
     assert (max_min_line_loading.round(13)).equals(
         output_table_row_per_line.round(13)
@@ -52,9 +55,7 @@ def test_invalid_input_data():
 
     # test the incorrect input data
     with pytest.raises(ValidationException):
-        max_min_voltages, max_min_line_loading = pgm_calculation(
-            path_incorrect_input_network_data, path_active_profile, path_reactive_profile
-        )
+        model_pgm.create_pgm(path_incorrect_input_network_data)
 
 
 def test_invalid_batch_dataset():
@@ -75,10 +76,7 @@ def test_invalid_batch_dataset():
 
     # test wrong batch update (batch update sym_load id not in input network)
     with pytest.raises(ValidationException):
-        max_min_voltages, max_min_line_loading = pgm_calculation(
-            input_network_data, path_incorrect_active_profile, path_incorrect_reactive_profile
-        )
-
+        model_pgm.create_batch_update_data(path_incorrect_active_profile, path_incorrect_reactive_profile)
 
 def test_load_ids_not_matching_error():
     # create incorrect load ID in active power profile and output new parquet file
@@ -89,9 +87,7 @@ def test_load_ids_not_matching_error():
 
     # test incorrect active profile
     with pytest.raises(ProfileLoadIDsNotMatchingError):
-        max_min_voltages, max_min_line_loading = pgm_calculation(
-            input_network_data, path_incorrect_active_profile, path_reactive_profile
-        )
+        model_pgm.create_batch_update_data(path_incorrect_active_profile, path_reactive_profile)
 
 
 def test_time_stamp_ids_not_matching_error():
@@ -105,6 +101,19 @@ def test_time_stamp_ids_not_matching_error():
 
     # test incorrect active profile
     with pytest.raises(ProfileTimestampsNotMatchingError):
-        max_min_voltages, max_min_line_loading = pgm_calculation(
-            input_network_data, path_incorrect_active_profile, path_reactive_profile
-        )
+        model_pgm.create_batch_update_data(path_incorrect_active_profile, path_reactive_profile)
+
+def test_update_model():
+    model_pgm=pgm_calculation()
+    model_pgm.create_pgm(input_network_data)
+    model_pgm.create_batch_update_data(path_active_profile, path_reactive_profile)
+    model_pgm.run_power_flow_calculation()
+
+    update_line =initialize_array("update", "line", 1)
+    update_line["id"]=model_pgm.input_data["line"][0]["id"]
+    update_line["to_status"]=[0]
+    update_tap_data={"line":update_line}
+
+    model_pgm.update_model(update_tap_data)
+
+test_update_model()

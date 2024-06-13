@@ -8,6 +8,7 @@ system network. The main goal is to achieve optimal power distribution by adjust
 import pandas as pd
 import numpy as np
 from power_grid_model.utils import json_deserialize, json_serialize_to_file
+from power_grid_model import initialize_array
 from power_system_simulation.pgm_calculation_module import pgm_calculation
 
 class InvalidMode(Exception):
@@ -40,8 +41,6 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
     with open(input_network_data, encoding="utf-8") as ind:
         input_data = json_deserialize(ind.read())
 
-    active_power_profile = pd.read_parquet(path_active_power_profile)
-    reactive_power_profile = pd.read_parquet(path_reactive_power_profile)
     min_pos=np.take(input_data["transformer"]["tap_min"],0)
     max_pos=np.take(input_data["transformer"]["tap_max"],0)
 
@@ -50,13 +49,29 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
         max_pos=min_pos
         min_pos=temp_min_pos
     
+    #initialize and create model
+    model_tap=pgm_calculation()
+    model_tap.create_pgm(input_network_data)
+
+    transformer_id=model_tap.input_data["transformer"][0]["id"]
+    
+    #create power profile batch update data
+    model_tap.create_batch_update_data(pth_active_profile, pth_reactive_profile)
 
     for tap_pos in range(min_pos, max_pos+1):
-        input_data["transformer"]["tap_pos"][0] = tap_pos
+        #create model update data:
+        update_tap_pos=initialize_array("update", "transformer", 1)
+        update_tap_pos["id"]=transformer_id
+        update_tap_pos["tap_pos"]=[tap_pos]
+        update_tap_data={"transformer":update_tap_pos}
 
-        json_serialize_to_file(input_network_data, input_data)
+        model_tap.update_model(update_tap_data)
+        model_tap.run_power_flow_calculation()
 
-        voltage_df, loading_df = pgm_calculation(input_network_data, path_active_power_profile, path_reactive_power_profile)
+        if mode==0:
+            voltage_df=model_tap.aggregate_voltages()
+        else:
+            loading_df=model_tap.aggregate_line_loading()
 
         if mode == 0:
             avg_voltage_deviation = ((voltage_df[["Max_Voltage", "Min_Voltage"]] - 1).mean(axis=1)).mean()
