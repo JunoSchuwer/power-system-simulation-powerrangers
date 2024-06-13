@@ -65,3 +65,6 @@ max-branches=20
 # change max statements to 60
 max-statements=60
 # disable maximum local variables
+max-locals=100
+# maximum arguments to 7
+max-arguments=7

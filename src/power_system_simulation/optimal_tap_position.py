@@ -1,16 +1,38 @@
+"""
+optimal_tap_position.py
+
+This module provides functionality to simulate and determine the optimal tap positions in a power
+system network. The main goal is to achieve optimal power distribution by adjusting transformer taps.
+"""
+
 import pandas as pd
 from power_grid_model.utils import json_deserialize, json_serialize_to_file
-from power_system_simulation.pgm_calculation_module import *
+from power_system_simulation.pgm_calculation_module import pgm_calculation
 
 class InvalidMode(Exception):
     """Exception raised for an invalid mode, mode should be either 0(voltage) or 1(losses)"""
 
 def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, path_reactive_power_profile: str, mode=0):
-    '''Function takes 3 inputs: a network, power profiles, and a mode. The mode should either be 0 or 1 where 0 is 
-    minimum voltage differentiation and 1 is minimum losses. The function processes the inputs, then uses 
-    pgm_calculation_module to get data frames containing max, min voltage, and line losses. This is then processed 
-    to find an optimum tap by running the function for every possible tap position, which is then compared to a 
-    previous value.'''
+    """
+        Determines the optimal tap position for transformers in a power system network.
+
+    Args:
+        input_network_data (str): Path to the network configuration data file in JSON format.
+        path_active_power_profile (str): Path to the active power profile data file in Parquet format.
+        path_reactive_power_profile (str): Path to the reactive power profile data file in Parquet format.
+        mode (int, optional): Optimization mode; 0 for minimum voltage deviation, 1 for minimum losses. Default is 0.
+
+    Returns:
+        int: The optimal tap position.
+
+    Raises:
+        InvalidMode: If the mode is not 0 or 1.
+
+    This function processes the input network data and power profiles, and uses the `pgm_calculation` function 
+    to obtain data frames containing max and min voltages, and line losses. It then determines the optimal
+    position by iterating through all possible tap positions, comparing voltage deviations or losses as per the mode
+    """
+
 
     if mode not in [0, 1]:
         raise InvalidMode("Mode must either be 0 or 1")
