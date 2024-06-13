@@ -19,12 +19,16 @@ from power_grid_model.utils import json_deserialize
 from power_grid_model.validation import assert_valid_batch_data, assert_valid_input_data
 
 
-class ProfilesNotMatchingError(Exception):
-    """Error raised when active and reactive load profiles do not have matching timestamps and/or load ids"""
+class ProfileTimestampsNotMatchingError(Exception):
+    """Error raised when active and reactive load profiles do not have matching timestamps"""
+
+
+class ProfileLoadIDsNotMatchingError(Exception):
+    """Error raised when active and reactive load profiles do not have matching Load IDs"""
 
 
 def pgm_calculation(
-    input_network_data: str, path_active_power_profile: str, path_reactive_power_profile: str
+    input_network_data: str, path_active_power_profile: str, path_reactive_power_profile: str, input_data_check=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     # pylint: disable=R0914
     """
@@ -50,16 +54,18 @@ def pgm_calculation(
     reactive_power_profile = pd.read_parquet(path_reactive_power_profile)
 
     # validate input data, raises `ValidationException`
-    assert_valid_input_data(input_data=input_data, calculation_type=CalculationType.power_flow)
+    if input_data_check:
+        assert_valid_input_data(input_data=input_data, calculation_type=CalculationType.power_flow)
 
     # construct model
     model = PowerGridModel(input_data=input_data)
 
     # check if IDs and timestamps match
-    if (active_power_profile.columns != reactive_power_profile.columns).any():
-        raise ProfilesNotMatchingError("Load IDs of active and reactive power do not match!")
-    if not active_power_profile.index.equals(reactive_power_profile.index):
-        raise ProfilesNotMatchingError("Timestamps of active and reactive power do not match!")
+    if input_data_check:
+        if (active_power_profile.columns != reactive_power_profile.columns).any():
+            raise ProfileLoadIDsNotMatchingError("Load IDs of active and reactive power do not match!")
+        if not active_power_profile.index.equals(reactive_power_profile.index):
+            raise ProfileTimestampsNotMatchingError("Timestamps of active and reactive power do not match!")
 
     # Create a PGM batch update dataset with the active and reactive load profiles
     batch_update_dataset = initialize_array("update", "sym_load", active_power_profile.shape)
@@ -69,7 +75,10 @@ def pgm_calculation(
     update_data = {"sym_load": batch_update_dataset}
 
     # validate batch update data, raises `ValidationException`
-    assert_valid_batch_data(input_data=input_data, update_data=update_data, calculation_type=CalculationType.power_flow)
+    if input_data_check:
+        assert_valid_batch_data(
+            input_data=input_data, update_data=update_data, calculation_type=CalculationType.power_flow
+        )
 
     # calculate output data
     output_data = model.calculate_power_flow(

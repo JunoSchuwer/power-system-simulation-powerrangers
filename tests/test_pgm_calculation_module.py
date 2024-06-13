@@ -8,7 +8,11 @@ from power_grid_model import CalculationMethod, CalculationType, PowerGridModel,
 from power_grid_model.utils import json_deserialize, json_serialize_to_file
 from power_grid_model.validation import ValidationException, assert_valid_batch_data, assert_valid_input_data
 
-from power_system_simulation.pgm_calculation_module import ProfilesNotMatchingError, pgm_calculation
+from power_system_simulation.pgm_calculation_module import (
+    ProfileLoadIDsNotMatchingError,
+    ProfileTimestampsNotMatchingError,
+    pgm_calculation,
+)
 
 # test data
 input_network_data = "tests/data/input/input_network_data.json"
@@ -67,7 +71,9 @@ def test_invalid_batch_dataset():
         "tests/data/incorrect_input_data/incorrect_batch_dataset_reactive_power_profile.parquet"
     )
     incorrect_active_power_profile.to_parquet(path_incorrect_active_profile, engine="pyarrow", compression="snappy")
-    incorrect_reactive_power_profile.to_parquet(path_incorrect_reactive_profile, engine="pyarrow", compression="snappy")
+    incorrect_reactive_power_profile.to_parquet(
+        path_incorrect_reactive_profile, engine="pyarrow", compression="snappy"
+    )
 
     # test wrong batch update (batch update sym_load id not in input network)
     with pytest.raises(ValidationException):
@@ -84,7 +90,7 @@ def test_load_ids_not_matching_error():
     incorrect_active_power_profile.to_parquet(path_incorrect_active_profile, engine="pyarrow", compression="snappy")
 
     # test incorrect active profile
-    with pytest.raises(ProfilesNotMatchingError):
+    with pytest.raises(ProfileLoadIDsNotMatchingError):
         max_min_voltages, max_min_line_loading = pgm_calculation(
             input_network_data, path_incorrect_active_profile, path_reactive_profile
         )
@@ -100,7 +106,7 @@ def test_time_stamp_ids_not_matching_error():
     incorrect_active_power_profile.to_parquet(path_incorrect_active_profile, engine="pyarrow", compression="snappy")
 
     # test incorrect active profile
-    with pytest.raises(ProfilesNotMatchingError):
+    with pytest.raises(ProfileTimestampsNotMatchingError):
         max_min_voltages, max_min_line_loading = pgm_calculation(
             input_network_data, path_incorrect_active_profile, path_reactive_profile
         )

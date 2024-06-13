@@ -40,13 +40,13 @@ testpaths = ["tests"]
 addopts = ["--cov=power_system_simulation", "--cov-report", "term", "--cov-report", "html:python_cov_html","--cov-report", "term-missing", "--cov-fail-under=95"]
 
 [tool.black]
-line-length = 120
+line-length = 119
 target-version = ['py312']
 
 [tool.isort]
 profile = "black"
 combine_as_imports = true
-line_length = 120
+line_length = 119
 
 [tool.pylint.main]
 # Specify a score threshold under which the program will exit with error.
@@ -64,3 +64,7 @@ max-attributes=15
 max-branches=20
 # change max statements to 60
 max-statements=60
+#change max arguments to 6
+max-args=6
+#change max local variables to 30
+max-locals = 30
