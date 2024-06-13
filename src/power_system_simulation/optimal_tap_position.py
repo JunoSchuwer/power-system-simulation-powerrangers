@@ -43,7 +43,7 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
     active_power_profile = pd.read_parquet(path_active_power_profile)
     reactive_power_profile = pd.read_parquet(path_reactive_power_profile)
 
-    for tap_pos in range(input_data["transformer"]["tap_min"][0], input_data["transformer"]["tap_max"][0]):
+    for tap_pos in range(input_data["transformer"]["tap_min"][0], input_data["transformer"]["tap_max"][0]+1):
         input_data["transformer"]["tap_min"][0] = tap_pos
 
         json_serialize_to_file(input_network_data, input_data)
@@ -71,3 +71,10 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
                 store_pos = tap_pos
 
     return store_pos
+
+pth_input_network_data = "tests/data/small_network/input/input_network_data.json"
+pth_active_profile = "tests/data/small_network/input/active_power_profile.parquet"
+pth_reactive_profile = "tests/data/small_network/input/reactive_power_profile.parquet"
+
+pos=optimal_tap_pos(pth_input_network_data,pth_active_profile,pth_reactive_profile)
+print(pos)
