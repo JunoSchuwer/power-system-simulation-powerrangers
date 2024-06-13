@@ -43,64 +43,76 @@ Methods:
 """
 
 from typing import List
+
 import networkx as nx
 import numpy as np
 
+
 class IDNotFoundError(Exception):
-    '''Exception raises when no id is found'''
+    """Exception raises when no id is found"""
+
 
 class VertexIDcontainsnoninterger(Exception):
-    '''Exception raises when an ID is invalid'''
+    """Exception raises when an ID is invalid"""
+
 
 class InputLengthDoesNotMatchError(Exception):
-    '''Exception raises when the amount of edges does not match the edge id pairs'''
+    """Exception raises when the amount of edges does not match the edge id pairs"""
+
 
 class IDNotUniqueError(Exception):
-    '''Exception raises when an ID is invalid'''
+    """Exception raises when an ID is invalid"""
+
 
 class GraphNotFullyConnectedError(Exception):
-    '''Exception raises when an vertex has no (disabled) connection'''
+    """Exception raises when an vertex has no (disabled) connection"""
+
 
 class GraphCycleError(Exception):
-    '''Exception raises when the graph is cyclic'''
+    """Exception raises when the graph is cyclic"""
+
 
 class EdgeAlreadyDisabledError(Exception):
-    '''Exception raises when an edge is disabled'''
+    """Exception raises when an edge is disabled"""
+
 
 class NegativeVertexIDError(Exception):
-    '''Exception raises when an ID is invalid'''
+    """Exception raises when an ID is invalid"""
+
 
 class GraphProcessor:
     """
-        Initializes the GraphProcessor with vertex IDs, edge IDs, edge vertex pairs, edge statuses, and source vertex ID
-        
-        Validates the input data to ensure all IDs are integers, unique, and correctly linked. Checks for graph
-        connectivity and acyclicity, raising appropriate exceptions if any conditions are violated.
-        
-        Args:
-            vertex_ids: An array of vertex IDs.
-            edge_ids: An array of edge IDs.
-            edge_vertex_id_pairs: An array of pairs representing edges between vertices.
-            edge_enabled: An array indicating the enabled status of each edge.
-            source_vertex_id: The ID of the source vertex.
+    Initializes the GraphProcessor with vertex IDs, edge IDs, edge vertex pairs, edge statuses, and source vertex ID
 
-        Raises:
-            NegativeVertexIDError: If any vertex ID is negative.
-            VertexIDcontainsnoninterger: If vertex IDs are not integers.
-            IDNotUniqueError: If vertex IDs or edge IDs are not unique.
-            InputLengthDoesNotMatchError: If lengths of edge-related inputs do not match.
-            IDNotFoundError: If any edge or vertex ID does not exist in the graph.
-            GraphNotFullyConnectedError: If the graph is not fully connected.
-            GraphCycleError: If the graph contains cycles.
-        """
+    Validates the input data to ensure all IDs are integers, unique, and correctly linked. Checks for graph
+    connectivity and acyclicity, raising appropriate exceptions if any conditions are violated.
 
-    def __init__(self,
+    Args:
+        vertex_ids: An array of vertex IDs.
+        edge_ids: An array of edge IDs.
+        edge_vertex_id_pairs: An array of pairs representing edges between vertices.
+        edge_enabled: An array indicating the enabled status of each edge.
+        source_vertex_id: The ID of the source vertex.
+
+    Raises:
+        NegativeVertexIDError: If any vertex ID is negative.
+        VertexIDcontainsnoninterger: If vertex IDs are not integers.
+        IDNotUniqueError: If vertex IDs or edge IDs are not unique.
+        InputLengthDoesNotMatchError: If lengths of edge-related inputs do not match.
+        IDNotFoundError: If any edge or vertex ID does not exist in the graph.
+        GraphNotFullyConnectedError: If the graph is not fully connected.
+        GraphCycleError: If the graph contains cycles.
+    """
+
+    def __init__(
+        self,
         vertex_ids: np.ndarray,
         edge_ids: np.ndarray,
         edge_vertex_id_pairs: np.ndarray,
         edge_enabled: np.ndarray,
-        source_vertex_id: int,) -> None:   
-         
+        source_vertex_id: int,
+    ) -> None:
+
         self.vertex_ids = vertex_ids
         self.edge_ids = edge_ids
         self.edge_vertex_id_pairs = edge_vertex_id_pairs
@@ -154,11 +166,11 @@ class GraphProcessor:
                 self.graph_cycles.add_edge(row[0], row[1])
         try:
             nx.find_cycle(self.graph_cycles)
-        except:
+        except nx.exception.NetworkXNoCycle:
             pass
         else:
             raise GraphCycleError("The graph contains cycles!")
-        
+
         # create children and parent dictionary used in other functions:
         self.network_dict = {}
         self.network_dict_edge_id = {}
@@ -173,9 +185,9 @@ class GraphProcessor:
     def find_downstream_vertices(self, edge_id: int) -> List[int]:
         """
         Returns a list of vertices downstream of the specified edge with respect to the source vertex.
-        
+
         Only considers enabled edges. Raises IDNotFoundError if the edge ID is invalid.
-        
+
         Args:
             edge_id: The ID of the edge to analyze.
 
@@ -213,9 +225,9 @@ class GraphProcessor:
         """
         Returns a list of alternative edge IDs that can be enabled to maintain graph connectivity and acyclicity
         after disabling the specified edge.
-        
+
         Raises IDNotFoundError if the edge ID is invalid and EdgeAlreadyDisabledError if the edge is already disabled.
-        
+
         Args:
             disabled_edge_id: The ID of the edge to be disabled.
 

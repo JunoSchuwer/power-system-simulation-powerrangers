@@ -52,6 +52,10 @@ line_length = 120
 # Specify a score threshold under which the program will exit with error.
 fail-under = 10
 
+disable = [
+    "attribute-defined-outside-init"
+]
+
 # Minimum Python version to use for version dependent checks. Will default to the
 # version used to run pylint.
 py-version = "3.12"
@@ -67,4 +71,4 @@ max-statements=60
 # disable maximum local variables
 max-locals=100
 # maximum arguments to 7
-max-arguments=7
+max-args=7
