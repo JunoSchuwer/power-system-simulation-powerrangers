@@ -122,7 +122,7 @@ class PGMcalculation:
         )
         self.model.update(update_data=model_update_data)
 
-    def run_power_flow_calculation(self, update_data_calc=0):
+    def run_power_flow_calculation(self, update_data_calc=0, timestamps_given=0):
         """
         Runs the power flow calculation using the model.
 
@@ -133,6 +133,8 @@ class PGMcalculation:
         """
         if update_data_calc == 0:
             update_data_calc = self.update_data
+        if not isinstance(timestamps_given, int):
+            self.timestamps = timestamps_given
         self.output_data = self.model.calculate_power_flow(
             update_data=update_data_calc, calculation_method=CalculationMethod.newton_raphson
         )
@@ -221,3 +223,15 @@ class PGMcalculation:
         max_min_line_loading_df.set_index("Line_ID", inplace=True)
 
         return max_min_line_loading_df
+
+
+pth_input_network_data = "tests/data/small_network/input/input_network_data.json"
+pth_active_profile = "tests/data/small_network/input/active_power_profile.parquet"
+pth_reactive_profile = "tests/data/small_network/input/reactive_power_profile.parquet"
+
+model_pgm = PGMcalculation()
+model_pgm.create_pgm(pth_input_network_data)
+model_pgm.create_batch_update_data(pth_active_profile, pth_reactive_profile)
+model_pgm.run_power_flow_calculation()
+max_min_voltages = model_pgm.aggregate_voltages()
+max_min_line_loading = model_pgm.aggregate_line_loading()
