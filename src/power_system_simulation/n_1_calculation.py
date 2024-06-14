@@ -14,6 +14,9 @@ class InvalidLineIDError(Exception):
 class LineNotConnectedError(Exception):
     """Error raised when the given line ID is not connected initially at both sides"""
 
+class LineAlreadyDisconnected(Exception):
+    """Error raised when the given line ID is already disconnected"""
+
 class n_1_calc:
     def __init__(self):
         """Initializes class"""
@@ -33,16 +36,18 @@ class n_1_calc:
 
         self.model_n1.create_batch_update_data(path_active_power_profile, path_reactive_power_profile)
 
-    def n_1_calculation(self, line_id_disconnect,reset_model_once_done=False):
+    def n_1_calculation(self, line_id_disconnect, reset_model_once_done=False):
         # first error handling:
         line_id_index=np.where(self.input_network_array_model.edge_ids == line_id_disconnect)[0]
         if line_id_index.size>0:
             line_id_index=line_id_index[0]
         else:
-            raise InvalidLineIDError("Line ID to disconnect is not a valid line ID")
+            raise InvalidLineIDError("Line ID to disconnect is not a valid line ID!")
 
         if self.input_network_array_model.edge_enabled[line_id_index]==False:
-            raise LineNotConnectedError("Line to be disconnected is already disconnected")
+            raise LineAlreadyDisconnected("Line to be disconnected is already disconnected!")
+        
+        # TO ADD LineNotConnected ERROR
         
         #update model
         update_line_data=self.create_line_update_data(line_id_disconnect,0)
