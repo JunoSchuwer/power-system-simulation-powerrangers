@@ -33,7 +33,7 @@ class n_1_calc:
 
         self.model_n1.create_batch_update_data(path_active_power_profile, path_reactive_power_profile)
 
-    def n_1_calculation(self, line_id_disconnect):
+    def n_1_calculation(self, line_id_disconnect,reset_model_once_done=False):
         # first error handling:
         line_id_index=np.where(self.input_network_array_model.edge_ids == line_id_disconnect)[0]
         if line_id_index.size>0:
@@ -63,6 +63,7 @@ class n_1_calc:
                 self.model_n1.update_model(update_line_data)
             update_line_data=self.create_line_update_data(alt_edge_id,1)
             self.model_n1.update_model(update_line_data)
+            previous_line_id=alt_edge_id
             
             #run calculation
             self.model_n1.run_power_flow_calculation()
@@ -74,6 +75,10 @@ class n_1_calc:
             max_loading=max_line_loading.at[max_index, 'Max_Loading']
             result_table_list.append([alt_edge_id, max_loading, max_index, max_loading_timestamp])
         
+        #reset last tested alternative edge:
+        update_line_data=self.create_line_update_data(previous_line_id,0)
+        self.model_n1.update_model(update_line_data)
+
         max_min_line_loading_df_columns = [
             "Alternative_Line_ID",
             "Max_Loading",
@@ -82,6 +87,12 @@ class n_1_calc:
         ]
         result_table = pd.DataFrame(result_table_list, columns=max_min_line_loading_df_columns)
         result_table.set_index("Alternative_Line_ID", inplace=True)
+
+        #reset disabled edge to enabled again
+        if reset_model_once_done:
+            update_line_data=self.create_line_update_data(line_id_disconnect,0)
+            self.model_n1.update_model(update_line_data)
+
         return result_table
 
     def create_line_update_data(self, line_id_dis, to_status_line):
@@ -108,4 +119,4 @@ pth_reactive_profile = "tests/data/small_network/input/reactive_power_profile.pa
 
 n_1_model=n_1_calc()
 n_1_model.setup_model(pth_input_network_data,pth_active_profile,pth_reactive_profile)
-print(n_1_model.n_1_calculation(18)) #line 24 is already disabled in small network
+print(n_1_model.n_1_calculation(18,True)) #line 24 is already disabled in small network, True => resets model to initial state (disabled line is not actually disabled)
