@@ -122,7 +122,7 @@ class PGMcalculation:
         )
         self.model.update(update_data=model_update_data)
 
-    def run_power_flow_calculation(self, update_data_calc=0, timestamps_given=0):
+    def run_power_flow_calculation(self, update_data_calc=0, timestamps_given=0, threads=1):
         """
         Runs the power flow calculation using the model.
 
@@ -136,7 +136,7 @@ class PGMcalculation:
         if not isinstance(timestamps_given, int):
             self.timestamps = timestamps_given
         self.output_data = self.model.calculate_power_flow(
-            update_data=update_data_calc, calculation_method=CalculationMethod.newton_raphson
+            update_data=update_data_calc, calculation_method=CalculationMethod.newton_raphson, threading=threads
         )
 
     def aggregate_voltages(self):

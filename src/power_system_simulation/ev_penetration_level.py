@@ -16,7 +16,7 @@ from power_system_simulation.pgm_calculation_module import PGMcalculation
 
 
 def ev_penetration_calculation(
-    path_input_network_data: str, path_ev_power_profile: str, path_meta_data: str, penetration_level_percentage: int
+    path_input_network_data: str, path_ev_power_profile: str, path_meta_data: str, penetration_level_percentage: int, assert_valid_pwr_profile=False
 ):
     """
     Perform EV (Electric Vehicle) penetration calculation based on input network data,
@@ -101,9 +101,10 @@ def ev_penetration_calculation(
     update_data = {"sym_load": sym_load_update_data}
 
     # Validate batch data
-    assert_valid_batch_data(
-        input_data=input_network, update_data=update_data, calculation_type=CalculationType.power_flow
-    )
+    if not assert_valid_pwr_profile:
+        assert_valid_batch_data(
+            input_data=input_network, update_data=update_data, calculation_type=CalculationType.power_flow
+        )
 
     # Run model and aggregate results
     model_ev.run_power_flow_calculation(update_data_calc=update_data, timestamps_given=timestamps_ev)
