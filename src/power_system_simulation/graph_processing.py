@@ -1,91 +1,118 @@
 """
-This is a skeleton for the graph processing assignment.
+This module defines a GraphProcessor class for handling and analyzing an undirected graph.
 
-We define a graph processor class with some function skeletons.
+The GraphProcessor class is designed to initialize, manipulate, and analyze the structure of an undirected graph.
+It ensures all vertices and edges are properly validated and provides functionality to find downstream vertices,
+identify alternative edges, and manage parent-child relationships within the graph.
+
+Exceptions are raised for invalid operations such as using non-existent IDs, attempting to disable an already disabled
+edge, or encountering cycles and disconnected components within the graph.
+
+Usage of this class requires initializing it with vertex IDs, edge IDs, edge vertex ID pairs, edge statuses
+(enabled/disabled), and a source vertex ID.
+
+Classes:
+    IDNotFoundError: Raised when a specified ID does not exist.
+    VertexIDcontainsnoninterger: Raised when a vertex ID is not an integer.
+    InputLengthDoesNotMatchError: Raised when the lengths of edge-related inputs do not match.
+    IDNotUniqueError: Raised when IDs are not unique.
+    GraphNotFullyConnectedError: Raised when the graph is not fully connected.
+    GraphCycleError: Raised when the graph contains cycles.
+    EdgeAlreadyDisabledError: Raised when an edge is already disabled.
+    NegativeVertexIDError: Raised when a vertex ID is negative.
+
+Methods:
+    __init__(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id):
+        Initializes the GraphProcessor with the given graph data and performs validations.
+
+    find_downstream_vertices(edge_id):
+        Returns a list of vertices downstream of a specified edge with respect to the source vertex. 
+        Raises IDNotFoundError if the edge ID is invalid.
+
+    find_alternative_edges(disabled_edge_id):
+        Returns a list of alternative edge IDs that can be enabled to 
+        maintain graph connectivity and acyclicityafter disabling the specified edge.
+        Raises IDNotFoundError if the edge ID is invalid, EdgeAlreadyDisabledError if the edge is already disabled.
+
+    create_children_parent_dictonary(start_vertex_id):
+        Performs a depth-first search to construct parent-child relationships starting from the source vertex.
+
+    create_network_dict():
+        Constructs a dictionary mapping each vertex to its connected vertices 
+        and another mapping to edge IDs for those connections.
 """
 
-# pylint: disable=W0611
-# pylint: disable=R0913
-import random
-import time
-from typing import List, Tuple
+from typing import List
 
 import networkx as nx
 import numpy as np
-from networkx.exception import NetworkXNoCycle
 
 
-# pylint: disable=C0115
 class IDNotFoundError(Exception):
-    pass
+    """Exception raises when no id is found"""
 
 
 class VertexIDcontainsnoninterger(Exception):
-    pass
+    """Exception raises when an ID is invalid"""
 
 
 class InputLengthDoesNotMatchError(Exception):
-    pass
+    """Exception raises when the amount of edges does not match the edge id pairs"""
 
 
 class IDNotUniqueError(Exception):
-    pass
+    """Exception raises when an ID is invalid"""
 
 
 class GraphNotFullyConnectedError(Exception):
-    pass
+    """Exception raises when an vertex has no (disabled) connection"""
 
 
 class GraphCycleError(Exception):
-    pass
+    """Exception raises when the graph is cyclic"""
 
 
 class EdgeAlreadyDisabledError(Exception):
-    pass
+    """Exception raises when an edge is disabled"""
 
 
 class NegativeVertexIDError(Exception):
-    pass
+    """Exception raises when an ID is invalid"""
 
 
-# pylint: enable=C0115
 class GraphProcessor:
     """
-    General documentation of this class.
-    You need to describe the purpose of this class and the functions in it.
-    We are using an undirected graph in the processor.
+    Initializes the GraphProcessor with vertex IDs, edge IDs, edge vertex pairs, edge statuses, and source vertex ID
+
+    Validates the input data to ensure all IDs are integers, unique, and correctly linked. Checks for graph
+    connectivity and acyclicity, raising appropriate exceptions if any conditions are violated.
+
+    Args:
+        vertex_ids: An array of vertex IDs.
+        edge_ids: An array of edge IDs.
+        edge_vertex_id_pairs: An array of pairs representing edges between vertices.
+        edge_enabled: An array indicating the enabled status of each edge.
+        source_vertex_id: The ID of the source vertex.
+
+    Raises:
+        NegativeVertexIDError: If any vertex ID is negative.
+        VertexIDcontainsnoninterger: If vertex IDs are not integers.
+        IDNotUniqueError: If vertex IDs or edge IDs are not unique.
+        InputLengthDoesNotMatchError: If lengths of edge-related inputs do not match.
+        IDNotFoundError: If any edge or vertex ID does not exist in the graph.
+        GraphNotFullyConnectedError: If the graph is not fully connected.
+        GraphCycleError: If the graph contains cycles.
     """
 
     def __init__(
         self,
-        vertex_ids: np.ndarray,  # Changed data types - all can be interpreted as 1D or 2D (for ID pairs) arrays
+        vertex_ids: np.ndarray,
         edge_ids: np.ndarray,
         edge_vertex_id_pairs: np.ndarray,
         edge_enabled: np.ndarray,
         source_vertex_id: int,
     ) -> None:
-        """
-        Initialize a graph processor object with an undirected graph.
-        Only the edges which are enabled are taken into account.
-        Check if the input is valid and raise exceptions if not.
-        The following conditions should be checked:
-            1. vertex_ids and edge_ids should be unique. (IDNotUniqueError)
-            2. edge_vertex_id_pairs should have the same length as edge_ids. (InputLengthDoesNotMatchError)
-            3. edge_vertex_id_pairs should contain valid vertex ids. (IDNotFoundError)
-            4. edge_enabled should have the same length as edge_ids. (InputLengthDoesNotMatchError)
-            5. source_vertex_id should be a valid vertex id. (IDNotFoundError)
-            6. The graph should be fully connected. (GraphNotFullyConnectedError)
-            7. The graph should not contain cycles. (GraphCycleError)
-        If one certain condition is not satisfied, the error in the parentheses should be raised.
 
-        Args:
-            vertex_ids: list of vertex ids
-            edge_ids: liest of edge ids
-            edge_vertex_id_pairs: list of tuples of two integer
-                Each tuple is a vertex id pair of the edge.
-            edge_enabled: list of bools indicating of an edge is enabled or not
-            source_vertex_id: vertex id of the source in the graph
-        """
         self.vertex_ids = vertex_ids
         self.edge_ids = edge_ids
         self.edge_vertex_id_pairs = edge_vertex_id_pairs
@@ -137,15 +164,12 @@ class GraphProcessor:
         for i, row in enumerate(self.edge_vertex_id_pairs):  # Using enumerate for clarity
             if self.edge_enabled[i]:
                 self.graph_cycles.add_edge(row[0], row[1])
-
-        # pylint: disable=W0702
         try:
             nx.find_cycle(self.graph_cycles)
-        except:
+        except nx.exception.NetworkXNoCycle:
             pass
         else:
             raise GraphCycleError("The graph contains cycles!")
-        # pylint: enable=W0702
 
         # create children and parent dictionary used in other functions:
         self.network_dict = {}
@@ -160,27 +184,18 @@ class GraphProcessor:
 
     def find_downstream_vertices(self, edge_id: int) -> List[int]:
         """
-        Given an edge id, return all the vertices which are in the downstream of the edge,
-            with respect to the source vertex.
-            Including the downstream vertex of the edge itself!
+        Returns a list of vertices downstream of the specified edge with respect to the source vertex.
 
-        Only enabled edges should be taken into account in the analysis.
-        If the given edge_id is a disabled edge, it should return empty list.
-        If the given edge_id does not exist, it should raise IDNotFoundError.
-
-
-        For example, given the following graph (all edges enabled):
-
-            vertex_0 (source) --edge_1-- vertex_2 --edge_3-- vertex_4
-
-        Call find_downstream_vertices with edge_id=1 will return [2, 4]
-        Call find_downstream_vertices with edge_id=3 will return [4]
+        Only considers enabled edges. Raises IDNotFoundError if the edge ID is invalid.
 
         Args:
-            edge_id: edge id to be searched
+            edge_id: The ID of the edge to analyze.
 
         Returns:
-            A list of all downstream vertices.
+            A list of downstream vertex IDs.
+
+        Raises:
+            IDNotFoundError: If the edge ID is invalid.
         """
         if edge_id not in self.edge_ids:
             raise IDNotFoundError("Given edge ID is not a valid edge ID!")
@@ -208,40 +223,21 @@ class GraphProcessor:
 
     def find_alternative_edges(self, disabled_edge_id: int) -> List[int]:
         """
-        Given an enabled edge, do the following analysis:
-            If the edge is going to be disabled,
-                which (currently disabled) edge can be enabled to ensure
-                that the graph is again fully connected and acyclic?
-            Return a list of all alternative edges.
-        If the disabled_edge_id is not a valid edge id, it should raise IDNotFoundError.
-        If the disabled_edge_id is already disabled, it should raise EdgeAlreadyDisabledError.
-        If there are no alternative to make the graph fully connected again, it should return empty list.
+        Returns a list of alternative edge IDs that can be enabled to maintain graph connectivity and acyclicity
+        after disabling the specified edge.
 
-
-        For example, given the following graph:
-
-        vertex_0 (source) --edge_1(enabled)-- vertex_2 --edge_9(enabled)-- vertex_10
-                 |                               |
-                 |                           edge_7(disabled)
-                 |                               |
-                 -----------edge_3(enabled)-- vertex_4
-                 |                               |
-                 |                           edge_8(disabled)
-                 |                               |
-                 -----------edge_5(enabled)-- vertex_6
-
-        Call find_alternative_edges with disabled_edge_id=1 will return [7]
-        Call find_alternative_edges with disabled_edge_id=3 will return [7, 8]
-        Call find_alternative_edges with disabled_edge_id=5 will return [8]
-        Call find_alternative_edges with disabled_edge_id=9 will return []
+        Raises IDNotFoundError if the edge ID is invalid and EdgeAlreadyDisabledError if the edge is already disabled.
 
         Args:
-            disabled_edge_id: edge id (which is currently enabled) to be disabled
+            disabled_edge_id: The ID of the edge to be disabled.
 
         Returns:
-            A list of alternative edge ids.
+            A list of alternative edge IDs or an empty list if no alternatives exist.
+
+        Raises:
+            IDNotFoundError: If the edge ID is invalid.
+            EdgeAlreadyDisabledError: If the edge is already disabled.
         """
-        # handle errors:
         if disabled_edge_id not in self.edge_ids:
             raise IDNotFoundError("Edge ID: " + str(disabled_edge_id) + " trying to be disabled does not exist!")
         index_edge = np.where(self.edge_ids == disabled_edge_id)[0][0]
