@@ -165,14 +165,16 @@ class PGMcalculation:
         u_pu_min_node_ids = np.take_along_axis(node_id, u_pu_min_indices[:, None], axis=1).flatten()
 
         # Construct the DataFrame
-        max_min_voltage_df = pd.DataFrame({
-            "Timestamp": self.timestamps,
-            "Max_Voltage": u_pu_max,
-            "Max_Voltage_Node": u_pu_max_node_ids,
-            "Min_Voltage": u_pu_min,
-            "Min_Voltage_Node": u_pu_min_node_ids
-        })
-        
+        max_min_voltage_df = pd.DataFrame(
+            {
+                "Timestamp": self.timestamps,
+                "Max_Voltage": u_pu_max,
+                "Max_Voltage_Node": u_pu_max_node_ids,
+                "Min_Voltage": u_pu_min,
+                "Min_Voltage_Node": u_pu_min_node_ids,
+            }
+        )
+
         max_min_voltage_df.set_index("Timestamp", inplace=True)
 
         return max_min_voltage_df
@@ -201,13 +203,13 @@ class PGMcalculation:
 
         # Initialize arrays to store results
         max_loadings = np.zeros_like(unique_line_ids, dtype=float)
-        max_loading_timestamps = np.zeros_like(unique_line_ids, dtype='datetime64[ns]')
+        max_loading_timestamps = np.zeros_like(unique_line_ids, dtype="datetime64[ns]")
         min_loadings = np.zeros_like(unique_line_ids, dtype=float)
-        min_loading_timestamps = np.zeros_like(unique_line_ids, dtype='datetime64[ns]')
+        min_loading_timestamps = np.zeros_like(unique_line_ids, dtype="datetime64[ns]")
 
         # Iterate over unique line IDs
         for idx, line_id_i in enumerate(unique_line_ids):
-            line_mask = (line_id == line_id_i)
+            line_mask = line_id == line_id_i
             loads = line_loading[line_mask]
 
             # Calculate max and min loadings and their timestamps
@@ -217,14 +219,16 @@ class PGMcalculation:
             min_loading_timestamps[idx] = timestamps[np.argmin(loads)]
 
         # Construct the DataFrame
-        max_min_line_loading_df = pd.DataFrame({
-            "Line_ID": unique_line_ids,
-            "Total_Loss": e_losses_kwh,
-            "Max_Loading": max_loadings,
-            "Max_Loading_Timestamp": max_loading_timestamps,
-            "Min_Loading": min_loadings,
-            "Min_Loading_Timestamp": min_loading_timestamps
-        })
+        max_min_line_loading_df = pd.DataFrame(
+            {
+                "Line_ID": unique_line_ids,
+                "Total_Loss": e_losses_kwh,
+                "Max_Loading": max_loadings,
+                "Max_Loading_Timestamp": max_loading_timestamps,
+                "Min_Loading": min_loadings,
+                "Min_Loading_Timestamp": min_loading_timestamps,
+            }
+        )
 
         max_min_line_loading_df.set_index("Line_ID", inplace=True)
 
