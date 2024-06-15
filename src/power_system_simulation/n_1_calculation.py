@@ -1,4 +1,5 @@
-'''provides an alternative grid topology if a line is disabled'''
+"""provides an alternative grid topology if a line is disabled"""
+
 import numpy as np
 import pandas as pd
 from power_grid_model import initialize_array
@@ -7,23 +8,16 @@ from power_grid_model import initialize_array
 class InvalidLineIDError(Exception):
     """Error raised when the given line ID to be disconnected is not valid"""
 
-class LineAlreadyDisconnected(Exception):
-    """Error raised when the given line ID is already disconnected"""
 
 def n_1_calculation_module(model_n1, input_network_array_model, line_id_disconnect, reset_model_once_done=False):
-    '''provides a alternative grid topology when an line is disconnected
-    takes and line id '''
+    """provides a alternative grid topology when an line is disconnected
+    takes and line id"""
     # first error handling:
     line_id_index = np.where(input_network_array_model.edge_ids == line_id_disconnect)[0]
     if line_id_index.size > 0:
         line_id_index = line_id_index[0]
     else:
         raise InvalidLineIDError("Line ID to disconnect is not a valid line ID!")
-
-    if input_network_array_model.edge_enabled[line_id_index] is False:
-        raise LineAlreadyDisconnected("Line to be disconnected is already disconnected!")
-
-    # TO ADD LineNotConnected ERROR
 
     # update model
     update_line_data = create_line_update_data(line_id_disconnect, 0)
@@ -74,9 +68,9 @@ def n_1_calculation_module(model_n1, input_network_array_model, line_id_disconne
 
     return result_table
 
+
 def create_line_update_data(line_id_dis, to_status_line):
-    '''Updates line date, takes and id and status and returns update data
-    '''
+    """Updates line date, takes and id and status and returns update data"""
     update_line_dt = initialize_array("update", "line", 1)
     update_line_dt["id"] = [line_id_dis]  # change line ID 3
     update_line_dt["from_status"] = [to_status_line]

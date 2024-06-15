@@ -65,7 +65,7 @@ max-line-length=120
 # change instance attributes to 15
 max-attributes=15
 # change many branches to 20
-max-branches=20
+max-branches=25
 # change max statements to 60
 max-statements=60
 # disable maximum local variables

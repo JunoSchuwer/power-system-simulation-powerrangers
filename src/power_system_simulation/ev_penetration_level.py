@@ -11,7 +11,6 @@ from power_grid_model.utils import json_deserialize
 from power_grid_model.validation import assert_valid_batch_data
 
 
-
 def ev_penetration_calculation(
     model_ev,
     model_ev_arrays,
