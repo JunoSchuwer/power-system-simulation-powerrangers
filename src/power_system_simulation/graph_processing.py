@@ -259,7 +259,7 @@ class GraphProcessor:
                     continue
                 index_edge_id_dict = self.network_dict[i].index(neighbour)
                 alt_edges.append(self.network_dict_edge_id[i][index_edge_id_dict])
-        
+
         return alt_edges
 
     def create_children_parent_dictonary(self, start_vertex_id: int) -> None:

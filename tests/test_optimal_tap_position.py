@@ -19,4 +19,4 @@ def test_optimal_tap_position_mode_1():
 
 def test_invalid_mode():
     with pytest.raises(InvalidMode):
-    pos = optimal_tap_pos(pth_input_network_data, pth_active_profile, pth_reactive_profile, 2)
+        pos = optimal_tap_pos(pth_input_network_data, pth_active_profile, pth_reactive_profile, 2)

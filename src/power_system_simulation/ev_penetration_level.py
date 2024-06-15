@@ -105,8 +105,6 @@ def ev_penetration_calculation(
             input_data=input_network, update_data=update_data, calculation_type=CalculationType.power_flow
         )
 
-
-
     # Run model and aggregate results
     model_ev.run_power_flow_calculation(update_data_calc=update_data, timestamps_given=timestamps_ev)
     df_voltages = model_ev.aggregate_voltages()

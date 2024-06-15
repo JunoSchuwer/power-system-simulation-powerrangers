@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from power_grid_model import CalculationType, initialize_array
+from power_grid_model import initialize_array
 from power_grid_model.utils import json_deserialize
 
 from power_system_simulation.graph_processing import GraphProcessor
@@ -107,6 +107,9 @@ class n_1_calc:
         return result_table
 
     def create_line_update_data(self, line_id_dis, to_status_line):
+        '''Updates line date, takes and id and status and retuns and updated 
+        
+        '''
         update_line_dt = initialize_array("update", "line", 1)
         update_line_dt["id"] = [line_id_dis]  # change line ID 3
         update_line_dt["from_status"] = [to_status_line]
@@ -116,12 +119,6 @@ class n_1_calc:
 
         return update_line_data
 
-
-# pth_input_network_data = "C:/Users/20201855/Downloads/PWR_sys_comp_sim/big_network/input/input_network_data.json"
-# pth_active_profile = "C:/Users/20201855/Downloads/PWR_sys_comp_sim/big_network/input/active_power_profile.parquet"
-# pth_reactive_profile = "C:/Users/20201855/Downloads/PWR_sys_comp_sim/big_network/input/reactive_power_profile.parquet"
-# pth_ev_active_power_profile= "C:/Users/20201855/Downloads/PWR_sys_comp_sim/big_network/input/ev_active_power_profile.parquet"
-# pth_meta_data="C:/Users/20201855/Downloads/PWR_sys_comp_sim/big_network/input/meta_data.json"
 
 PTH_INPUT_NETWORK_DATA = "tests/data/small_network/input/input_network_data.json"
 PTH_ACTIVE_PROFILE = "tests/data/small_network/input/active_power_profile.parquet"
