@@ -187,46 +187,39 @@ class PGMcalculation:
             DataFrame containing line IDs, total losses, maximum loading,
             and minimum loading along with their respective timestamps.
         """
-        line_loading, line_id, p_from, p_to = (
-            self.output_data["line"]["loading"],
-            self.output_data["line"]["id"],
-            self.output_data["line"]["p_from"],
-            self.output_data["line"]["p_to"],
-        )
+        line_loading = self.output_data["line"]["loading"]
+        line_id = self.output_data["line"]["id"]
+        p_from = self.output_data["line"]["p_from"]
+        p_to = self.output_data["line"]["p_to"]
+        timestamps = self.timestamps
 
         unique_line_ids = np.unique(line_id)
-
-        # Initialize arrays to store results
-        total_losses_kwh = np.zeros(unique_line_ids.shape)
-        max_loadings = np.zeros(unique_line_ids.shape)
-        max_loading_timestamps = np.zeros(unique_line_ids.shape, dtype='datetime64[ns]')
-        min_loadings = np.zeros(unique_line_ids.shape)
-        min_loading_timestamps = np.zeros(unique_line_ids.shape, dtype='datetime64[ns]')
 
         # Calculate losses for each line over time
         e_losses = np.abs(p_from + p_to)  # p_from and p_to are in Watts
         e_losses_kwh = np.trapz(e_losses, axis=0) / 1000  # integrate over time and convert to kWh
 
+        # Initialize arrays to store results
+        max_loadings = np.zeros_like(unique_line_ids, dtype=float)
+        max_loading_timestamps = np.zeros_like(unique_line_ids, dtype='datetime64[ns]')
+        min_loadings = np.zeros_like(unique_line_ids, dtype=float)
+        min_loading_timestamps = np.zeros_like(unique_line_ids, dtype='datetime64[ns]')
+
+        # Iterate over unique line IDs
         for idx, line_id_i in enumerate(unique_line_ids):
-            # Select rows corresponding to the current line_id
             line_mask = (line_id == line_id_i)
             loads = line_loading[line_mask]
-            print(line_mask)
-            print(e_losses_kwh)
 
-            # Compute max and min loadings and their timestamps
+            # Calculate max and min loadings and their timestamps
             max_loadings[idx] = loads.max()
-            max_loading_timestamps[idx] = self.timestamps[np.argmax(loads)]
+            max_loading_timestamps[idx] = timestamps[np.argmax(loads)]
             min_loadings[idx] = loads.min()
-            min_loading_timestamps[idx] = self.timestamps[np.argmin(loads)]
-
-            # Assign the total losses
-            total_losses_kwh[idx] = e_losses_kwh[line_mask].sum()
+            min_loading_timestamps[idx] = timestamps[np.argmin(loads)]
 
         # Construct the DataFrame
         max_min_line_loading_df = pd.DataFrame({
             "Line_ID": unique_line_ids,
-            "Total_Loss": total_losses_kwh,
+            "Total_Loss": e_losses_kwh,
             "Max_Loading": max_loadings,
             "Max_Loading_Timestamp": max_loading_timestamps,
             "Min_Loading": min_loadings,
@@ -236,16 +229,3 @@ class PGMcalculation:
         max_min_line_loading_df.set_index("Line_ID", inplace=True)
 
         return max_min_line_loading_df
-
-
-pth_input_network_data = "tests/data/small_network/input/input_network_data.json"
-pth_active_profile = "tests/data/small_network/input/active_power_profile.parquet"
-pth_reactive_profile = "tests/data/small_network/input/reactive_power_profile.parquet"
-pth_output="tests\data\expected_output\output_table_row_per_line.parquet" 
-
-model_pgm = PGMcalculation()
-model_pgm.create_pgm(pth_input_network_data)
-model_pgm.create_batch_update_data(pth_active_profile, pth_reactive_profile)
-model_pgm.run_power_flow_calculation()
-max_min_voltages = model_pgm.aggregate_voltages()
-max_min_line_loading = model_pgm.aggregate_line_loading()

@@ -16,7 +16,7 @@ class InvalidMode(Exception):
     """Exception raised for an invalid mode, mode should be either 0(voltage) or 1(losses)"""
 
 
-def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, path_reactive_power_profile: str, mode=0):
+def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, path_reactive_power_profile: str, mode=0, number_threads=1):
     """
         Determines the optimal tap position for transformers in a power system network.
 
@@ -61,6 +61,7 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
     optimal_tap_pos_value = 0
 
     for tap_pos in range(min_pos, max_pos + 1):
+        print("trying tap pos: "+str(tap_pos) )
         # create model update data:
         update_tap_pos = initialize_array("update", "transformer", 1)
         update_tap_pos["id"] = transformer_id
@@ -68,8 +69,9 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
         update_tap_data = {"transformer": update_tap_pos}
 
         model_tap.update_model(update_tap_data)
-        model_tap.run_power_flow_calculation()
+        model_tap.run_power_flow_calculation(threads=number_threads)
 
+        print("aggregate")
         if mode == 0:
             voltage_df = model_tap.aggregate_voltages()
         else:
@@ -95,3 +97,13 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
                 optimal_tap_pos_value = tap_pos
 
     return optimal_tap_pos_value
+
+pth_input_network_data = "C:/Users/20201855/Downloads/PWR_sys_comp_sim/big_network/input/input_network_data.json"
+pth_active_profile = "C:/Users/20201855/Downloads/PWR_sys_comp_sim/big_network/input/active_power_profile.parquet"
+pth_reactive_profile = "C:/Users/20201855/Downloads/PWR_sys_comp_sim/big_network/input/reactive_power_profile.parquet"
+pth_ev_active_power_profile= "C:/Users/20201855/Downloads/PWR_sys_comp_sim/big_network/input/ev_active_power_profile.parquet"
+pth_meta_data="C:/Users/20201855/Downloads/PWR_sys_comp_sim/big_network/input/meta_data.json"
+
+value_tap_optimal_results= optimal_tap_pos(pth_input_network_data, pth_active_profile, pth_reactive_profile, mode=0, number_threads=0)
+
+print(value_tap_optimal_results)
