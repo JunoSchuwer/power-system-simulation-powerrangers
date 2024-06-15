@@ -11,14 +11,8 @@ from power_system_simulation.pgm_calculation_module import PGMcalculation
 class InvalidLineIDError(Exception):
     """Error raised when the given line ID to be disconnected is not valid"""
 
-
-class LineNotConnectedError(Exception):
-    """Error raised when the given line ID is not connected initially at both sides"""
-
-
 class LineAlreadyDisconnected(Exception):
     """Error raised when the given line ID is already disconnected"""
-
 
 class n_1_calc:
     def __init__(self):
@@ -27,6 +21,8 @@ class n_1_calc:
     def setup_model(
         self, path_input_network_data: str, path_active_power_profile: str, path_reactive_power_profile: str
     ) -> None:
+        '''takes 3 string with directions to network data, active and reactive power profile.
+        returns a pgm'''
         # Create PGM model instance
         self.model_n1 = PGMcalculation()
         self.model_n1.create_pgm(path_input_network_data)
@@ -44,6 +40,8 @@ class n_1_calc:
         self.model_n1.create_batch_update_data(path_active_power_profile, path_reactive_power_profile)
 
     def n_1_calculation(self, line_id_disconnect, reset_model_once_done=False):
+        '''provides a alternative grid topology when an line is disconnected
+        takes and line id '''
         # first error handling:
         line_id_index = np.where(self.input_network_array_model.edge_ids == line_id_disconnect)[0]
         if line_id_index.size > 0:
@@ -69,7 +67,7 @@ class n_1_calc:
         previous_line_id = None
         for alt_edge_id in alternative_lines:
             # change model with new lines:
-            if previous_line_id != None:
+            if previous_line_id is not None:
                 update_line_data = self.create_line_update_data(previous_line_id, 0)
                 self.model_n1.update_model(update_line_data)
             update_line_data = self.create_line_update_data(alt_edge_id, 1)
