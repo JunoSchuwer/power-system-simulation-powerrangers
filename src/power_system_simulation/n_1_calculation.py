@@ -1,3 +1,4 @@
+'''provides an alternative grid topology if a line is disabled'''
 import numpy as np
 import pandas as pd
 from power_grid_model import initialize_array
@@ -14,7 +15,12 @@ class InvalidLineIDError(Exception):
 class LineAlreadyDisconnected(Exception):
     """Error raised when the given line ID is already disconnected"""
 
-class n_1_calc:
+class N1Calc:
+    '''provides alternative grid topology if an line is disabled. seperated into 3 different functions for performance.
+    set up model provides a pgm
+    n_1_calculation provides an alternative topology
+    create_line_update_data updates the data.
+    '''
     def __init__(self):
         """Initializes class"""
 
@@ -49,7 +55,7 @@ class n_1_calc:
         else:
             raise InvalidLineIDError("Line ID to disconnect is not a valid line ID!")
 
-        if self.input_network_array_model.edge_enabled[line_id_index] == False:
+        if self.input_network_array_model.edge_enabled[line_id_index] is False:
             raise LineAlreadyDisconnected("Line to be disconnected is already disconnected!")
 
         # TO ADD LineNotConnected ERROR
@@ -106,7 +112,6 @@ class n_1_calc:
 
     def create_line_update_data(self, line_id_dis, to_status_line):
         '''Updates line date, takes and id and status and retuns and updated 
-        
         '''
         update_line_dt = initialize_array("update", "line", 1)
         update_line_dt["id"] = [line_id_dis]  # change line ID 3
@@ -123,8 +128,8 @@ PTH_ACTIVE_PROFILE = "tests/data/small_network/input/active_power_profile.parque
 PTH_REACTIVE_PROFILE = "tests/data/small_network/input/reactive_power_profile.parquet"
 
 
-N_1_MODEL = n_1_calc()
+N_1_MODEL = N1Calc()
 N_1_MODEL.setup_model(PTH_INPUT_NETWORK_DATA, PTH_ACTIVE_PROFILE, PTH_REACTIVE_PROFILE)
 print(
     N_1_MODEL.n_1_calculation(18, True)
-)  # line 24 is already disabled in small network, True => resets model to initial state (disabled line is not actually disabled)
+) #True => resets model to initial state (disabled line is not actually disabled)
