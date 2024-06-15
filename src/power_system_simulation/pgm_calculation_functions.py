@@ -114,6 +114,12 @@ class PGMfunctions:
             vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id
         )
 
+    def run_single_powerflow_calculation(self):
+        self.model.run_power_flow_calculation()
+        voltages = self.model.aggregate_voltages()
+        loadings = self.model.aggregate_line_loading()
+        return voltages, loadings
+
     def input_data_validity_check(self, test_case=0):
         """
         Validates the input data paths and raises appropriate exceptions if any path is missing.

@@ -49,6 +49,11 @@ def test_ev_penetration_level():
     assert loading.shape == (9, 5)
 
 
+# test running a single powerflow calculation
+def test_run_single_powerflow_calculation():
+    PGM_MODEL.run_single_powerflow_calculation()
+
+
 # test n-1:
 def test_n_1_calculation():
     PGM_MODEL.n_1_calculation(18, True)
