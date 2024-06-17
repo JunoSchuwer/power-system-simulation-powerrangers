@@ -72,7 +72,7 @@ runs a single powerflow calculation
 ```shell
 PGM_MODEL.ev_penetration_level(50, assert_valid_pwr_profile=True)
 ```
-runs an ev penetration level calculation, where 50 is the level of EV penetration, the second variable checks the input data validity.
+runs an ev penetration level calculation, where 50 is the percentage of EV penetration, the second variable checks the input data validity.
 ```shell
 PGM_MODEL.n_1_calculation(18,True)
 ``` 
