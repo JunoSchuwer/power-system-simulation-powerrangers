@@ -122,7 +122,7 @@ class PGMcalculation:
         )
         self.model.update(update_data=model_update_data)
 
-    def run_power_flow_calculation(self, update_data_calc=0, timestamps_given=0, threads=1):
+    def run_power_flow_calculation(self, update_data_calc=0, timestamps_given=0, threads=0):
         """
         Runs the power flow calculation using the model.
 

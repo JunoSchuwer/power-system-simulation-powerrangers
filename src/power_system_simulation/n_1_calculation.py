@@ -49,8 +49,9 @@ def n_1_calculation_module(model_n1, input_network_array_model, line_id_disconne
         result_table_list.append([alt_edge_id, max_loading, max_index, max_loading_timestamp])
 
     # reset last tested alternative edge:
-    update_line_data = create_line_update_data(previous_line_id, 0)
-    model_n1.update_model(update_line_data)
+    if previous_line_id is not None:
+        update_line_data = create_line_update_data(previous_line_id, 0)
+        model_n1.update_model(update_line_data)
 
     max_min_line_loading_df_columns = [
         "Alternative_Line_ID",
