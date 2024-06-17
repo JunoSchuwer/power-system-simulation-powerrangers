@@ -32,7 +32,7 @@ o	Optimize transformer tap positions.
 o	Perform N-1 calculations to identify alternative grid topologies.
 These tools enables optimization of LV grids, supporting the integration of renewable energy and electric vehicles.
 
-## Instalation
+## Installation
 To get started clone the repository and install the necessary dependacies, usage of a vm is recommended.
 ```shell
 pip install -e .[dev,example]
