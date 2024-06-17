@@ -1,20 +1,91 @@
-import json
-
-import numpy as np
-import pandas as pd
 import pytest
-from power_grid_model import CalculationMethod, CalculationType, PowerGridModel, initialize_array
-from power_grid_model.utils import json_deserialize
-from power_grid_model.validation import ValidationException, assert_valid_batch_data, assert_valid_input_data
+from power_grid_model.validation import ValidationException
 
 from power_system_simulation.graph_processing import *
 from power_system_simulation.input_data_validity_check import *
-from power_system_simulation.pgm_calculation_module import (
-    ProfileLoadIDsNotMatchingError,
-    ProfileTimestampsNotMatchingError,
+from power_system_simulation.n_1_calculation import *
+from power_system_simulation.optimal_tap_position import *
+from power_system_simulation.pgm_calculation_functions import PGMfunctions
+from power_system_simulation.pgm_calculation_module import *
+
+PTH_INPUT_NETWORK_DATA = "tests/data/small_network/input/input_network_data.json"
+PTH_ACTIVE_PROFILE = "tests/data/small_network/input/active_power_profile.parquet"
+PTH_REACTIVE_PROFILE = "tests/data/small_network/input/reactive_power_profile.parquet"
+PTH_EV_ACTIVE_POWER_PROFILE = "tests/data/small_network/input/ev_active_power_profile.parquet"
+PTH_META_DATA = "tests/data/small_network/input/meta_data.json"
+
+PGM_MODEL = PGMfunctions(
+    PTH_INPUT_NETWORK_DATA, PTH_ACTIVE_PROFILE, PTH_REACTIVE_PROFILE, PTH_EV_ACTIVE_POWER_PROFILE, PTH_META_DATA
 )
+PGM_MODEL.create_pgm_model()
+PGM_MODEL.create_batch_update_data()
 
 
+# test input validity check
+def test_input_validity_check_function():
+    Errors = [
+        ValidationException,
+        MultipleTransformersError,
+        MultipleSourcesError,
+        InvalidFeederIDError,
+        LVfeederNotMatchTransformOutError,
+        GraphNotFullyConnectedError,
+        GraphCycleError,
+        ProfileTimestampsNotMatchingError,
+        ProfileTimestampsNotMatchingError,
+        ProfileLoadIDsNotMatchingError,
+        LoadProfileIDsNotSymLoadError,
+        InsufficientEVchargingProfilesError,
+    ]
+    for i in range(1, 13):
+        with pytest.raises(Errors[i - 1]):
+            PGM_MODEL.input_data_validity_check(test_case=i)
+
+
+# test ev penetration level
+def test_ev_penetration_level():
+    voltages, loading = PGM_MODEL.ev_penetration_level(50, assert_valid_pwr_profile=True)
+    assert voltages.shape == (960, 4)
+    assert loading.shape == (9, 5)
+
+
+# test running a single powerflow calculation
+def test_run_single_powerflow_calculation():
+    PGM_MODEL.run_single_powerflow_calculation()
+
+
+# test n-1:
+def test_n_1_calculation():
+    PGM_MODEL.n_1_calculation(18, True)
+
+
+def test_n_1_invalid_line_id():
+    with pytest.raises(InvalidLineIDError):
+        PGM_MODEL.n_1_calculation(-1, True)
+
+
+def test_n_1_already_disconnected():
+    with pytest.raises(EdgeAlreadyDisabledError):
+        PGM_MODEL.n_1_calculation(24, True)
+
+
+# test optimal tap position:
+def test_optimal_tap_position_mode_0():
+    pos = PGM_MODEL.find_optimal_tap_position(optimization_mode=0)
+    assert pos == 1
+
+
+def test_optimal_tap_position_mode_1():
+    pos = PGM_MODEL.find_optimal_tap_position(optimization_mode=1)
+    assert pos == 5
+
+
+def test_invalid_mode():
+    with pytest.raises(InvalidMode):
+        PGM_MODEL.find_optimal_tap_position(optimization_mode=2)
+
+
+# changing data for datasets:
 def change_data_for_test(
     input_network, active_power_profile, reactive_power_profile, ev_power_profile, meta_data, test_case
 ):
@@ -87,36 +158,3 @@ def change_data_for_test(
         ev_power_profile = ev_power_profile.drop(ev_power_profile.columns[-1], axis=1)
 
     return input_network, active_power_profile, reactive_power_profile, ev_power_profile, meta_data
-
-
-def test_input_validity_check_function():
-    Errors = [
-        ValidationException,
-        MultipleTransformersError,
-        MultipleSourcesError,
-        InvalidFeederIDError,
-        LVfeederNotMatchTransformOutError,
-        GraphNotFullyConnectedError,
-        GraphCycleError,
-        ProfileTimestampsNotMatchingError,
-        ProfileTimestampsNotMatchingError,
-        ProfileLoadIDsNotMatchingError,
-        LoadProfileIDsNotSymLoadError,
-        InsufficientEVchargingProfilesError,
-    ]
-
-    for i in range(1, 13):
-        pth_input_network_data = "tests/data/small_network/input/input_network_data.json"
-        pth_active_profile = "tests/data/small_network/input/active_power_profile.parquet"
-        pth_reactive_profile = "tests/data/small_network/input/reactive_power_profile.parquet"
-        pth_ev_power_profile = "tests/data/small_network/input/ev_active_power_profile.parquet"
-        pth_meta_data = "tests/data/small_network/input/meta_data.json"
-        with pytest.raises(Errors[i - 1]):
-            validate_input_data(
-                pth_input_network_data,
-                pth_active_profile,
-                pth_reactive_profile,
-                pth_ev_power_profile,
-                pth_meta_data,
-                test_case=i,
-            )

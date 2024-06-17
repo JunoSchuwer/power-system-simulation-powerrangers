@@ -10,13 +10,15 @@ from power_grid_model import CalculationType, initialize_array
 from power_grid_model.utils import json_deserialize
 from power_grid_model.validation import assert_valid_batch_data
 
-from power_system_simulation.graph_processing import GraphProcessor
-from power_system_simulation.input_data_validity_check import reformat_pgm_to_array
-from power_system_simulation.pgm_calculation_module import PGMcalculation
-
 
 def ev_penetration_calculation(
-    path_input_network_data: str, path_ev_power_profile: str, path_meta_data: str, penetration_level_percentage: int
+    model_ev,
+    model_ev_arrays,
+    path_input_network_data: str,
+    path_ev_power_profile: str,
+    path_meta_data: str,
+    penetration_level_percentage: int,
+    assert_valid_pwr_profile=False,
 ):
     """
     Perform EV (Electric Vehicle) penetration calculation based on input network data,
@@ -33,17 +35,10 @@ def ev_penetration_calculation(
     - df_line_loading (DataFrame): DataFrame containing aggregated line loading data.
     """
 
-    # Create PGM model instance
-    model_ev = PGMcalculation()
-    model_ev.create_pgm(path_input_network_data)
-
     # Create array model of network
     with open(path_input_network_data, encoding="utf-8") as ind:
         input_network = json_deserialize(ind.read())
-    vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id = reformat_pgm_to_array(input_network)
-    input_network_array_model = GraphProcessor(
-        vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id
-    )
+    input_network_array_model = model_ev_arrays
 
     # Find list of LV feeders
     with open(path_meta_data, encoding="utf-8") as metadata:
@@ -101,9 +96,10 @@ def ev_penetration_calculation(
     update_data = {"sym_load": sym_load_update_data}
 
     # Validate batch data
-    assert_valid_batch_data(
-        input_data=input_network, update_data=update_data, calculation_type=CalculationType.power_flow
-    )
+    if not assert_valid_pwr_profile:
+        assert_valid_batch_data(
+            input_data=input_network, update_data=update_data, calculation_type=CalculationType.power_flow
+        )
 
     # Run model and aggregate results
     model_ev.run_power_flow_calculation(update_data_calc=update_data, timestamps_given=timestamps_ev)

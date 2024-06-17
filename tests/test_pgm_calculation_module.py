@@ -1,12 +1,10 @@
 import json
 import os
 
-import numpy as np
 import pandas as pd
 import pytest
-from power_grid_model import CalculationMethod, CalculationType, PowerGridModel, initialize_array, validation
-from power_grid_model.utils import json_deserialize, json_serialize_to_file
-from power_grid_model.validation import ValidationException, assert_valid_batch_data, assert_valid_input_data
+from power_grid_model import initialize_array
+from power_grid_model.validation import ValidationException
 
 from power_system_simulation.pgm_calculation_module import (
     PGMcalculation,

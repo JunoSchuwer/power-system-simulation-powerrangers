@@ -9,14 +9,17 @@ import numpy as np
 from power_grid_model import initialize_array
 from power_grid_model.utils import json_deserialize
 
-from power_system_simulation.pgm_calculation_module import PGMcalculation
-
 
 class InvalidMode(Exception):
     """Exception raised for an invalid mode, mode should be either 0(voltage) or 1(losses)"""
 
 
-def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, path_reactive_power_profile: str, mode=0):
+def optimal_tap_pos(
+    model,
+    input_network_data: str,
+    mode=0,
+    number_threads=1,
+):
     """
         Determines the optimal tap position for transformers in a power system network.
 
@@ -50,13 +53,9 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
         min_pos, max_pos = max_pos, min_pos
 
     # initialize and create model
-    model_tap = PGMcalculation()
-    model_tap.create_pgm(input_network_data)
+    model_tap = model
 
     transformer_id = model_tap.input_data["transformer"][0]["id"]
-
-    # create power profile batch update data
-    model_tap.create_batch_update_data(path_active_power_profile, path_reactive_power_profile)
 
     optimal_tap_pos_value = 0
 
@@ -68,7 +67,7 @@ def optimal_tap_pos(input_network_data: str, path_active_power_profile: str, pat
         update_tap_data = {"transformer": update_tap_pos}
 
         model_tap.update_model(update_tap_data)
-        model_tap.run_power_flow_calculation()
+        model_tap.run_power_flow_calculation(threads=number_threads)
 
         if mode == 0:
             voltage_df = model_tap.aggregate_voltages()
