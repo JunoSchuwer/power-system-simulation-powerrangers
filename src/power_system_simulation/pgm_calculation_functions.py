@@ -279,7 +279,7 @@ class PGMfunctions:
         )
 
     def find_optimal_tap_position(
-        self, optimization_mode=0, path_active_power_profile=0, path_reactive_power_profile=0, threads=1
+        self, optimization_mode=0, path_active_power_profile=0, path_reactive_power_profile=0, threads=0
     ):
         """
         Finds the optimal tap position based on the provided data and optimization mode.
